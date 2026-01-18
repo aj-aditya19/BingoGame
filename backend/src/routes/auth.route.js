@@ -19,7 +19,7 @@ router.post("/register", async (req, res) => {
   const user = await User.create({
     name,
     email,
-    password, // now saving properly
+    password,
   });
 
   req.session.user = user.email;
@@ -27,7 +27,6 @@ router.post("/register", async (req, res) => {
   res.json({ success: true, user });
 });
 
-// LOGIN
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -38,7 +37,6 @@ router.post("/login", async (req, res) => {
   res.json({ success: true, user });
 });
 
-// GOOGLE LOGIN / REGISTER
 router.post("/google", async (req, res) => {
   try {
     const { token } = req.body;
