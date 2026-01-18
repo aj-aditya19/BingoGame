@@ -1,0 +1,12 @@
+making folder
+backend - npm init -y
+web - 
+app - 
+---------------------------------
+installing items
+backend --> npm install express mongoose dotenv cors jsonwebtoken socket.io firebase-admin
+web -->     npm install socket.io-client firebase axios
+flutter --> flutter pub add firebase_core firebase_auth socket_io_client
+---------------------------------
+run -
+docker -> docker-compass up --build

@@ -1,0 +1,4 @@
+making an app in which a user can play a Bingo game with their friends.
+
+tech stack - flutter, react.js, node.js, express.js, mongodb, firebase, websockets, docker
+
