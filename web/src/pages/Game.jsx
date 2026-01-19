@@ -119,48 +119,83 @@
 
 // export default Grid;
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { socket } from "../services/socket";
 
-const Game = ({ grid }) => {
-  const [gameGrid, setGameGrid] = useState(grid);
+const Game = ({ roomId, myGrid, myUserId }) => {
+  const [grid, setGrid] = useState(myGrid);
+  const [currentTurn, setCurrentTurn] = useState(null); // userId
+  const [locked, setLocked] = useState(false);
 
-  const toggleCell = (r, c) => {
-    setGameGrid((prev) =>
-      prev.map((row, i) =>
-        row.map((cell, j) =>
-          i === r && j === c ? { ...cell, chosen: !cell.chosen } : cell,
+  // 🔁 start game
+  useEffect(() => {
+    socket.emit("game:start", { roomId });
+
+    socket.on("game:turn", ({ userId }) => {
+      setCurrentTurn(userId);
+    });
+
+    socket.on("game:update", ({ number }) => {
+      markNumber(number);
+      setLocked(false);
+    });
+
+    return () => {
+      socket.off("game:turn");
+      socket.off("game:update");
+    };
+  }, []);
+
+  // ✅ mark number in grid
+  const markNumber = (num) => {
+    setGrid((prev) =>
+      prev.map((row) =>
+        row.map((cell) =>
+          cell.value === num ? { ...cell, chosen: true } : cell,
         ),
       ),
     );
   };
 
+  // 🎯 user clicks number
+  const selectNumber = (cell) => {
+    if (locked) return;
+    if (cell.chosen) return;
+    if (currentTurn !== myUserId) return;
+
+    setLocked(true);
+
+    socket.emit("game:select-number", {
+      roomId,
+      number: cell.value,
+    });
+  };
+
   return (
-    <div style={{ maxWidth: 360, margin: "auto" }}>
-      <h2 style={{ textAlign: "center" }}>Bingo Game</h2>
+    <div>
+      <h3>Turn: {currentTurn === myUserId ? "Your Turn" : "Opponent Turn"}</h3>
 
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          gridTemplateColumns: "repeat(5, 60px)",
           gap: 6,
         }}
       >
-        {gameGrid.map((row, r) =>
-          row.map((cell, c) => (
-            <button
-              key={`${r}-${c}`}
-              onClick={() => toggleCell(r, c)}
-              style={{
-                height: 48,
-                borderRadius: 8,
-                background: cell.chosen ? "#22c55e" : "#e5e7eb",
-                fontSize: 16,
-              }}
-            >
-              {cell.value}
-            </button>
-          )),
-        )}
+        {grid.flat().map((cell, i) => (
+          <button
+            key={i}
+            disabled={cell.chosen || currentTurn !== myUserId}
+            onClick={() => selectNumber(cell)}
+            style={{
+              height: 60,
+              background: cell.chosen ? "#22c55e" : "#fff",
+              cursor: cell.chosen ? "not-allowed" : "pointer",
+            }}
+          >
+            {cell.value}
+          </button>
+        ))}
       </div>
     </div>
   );

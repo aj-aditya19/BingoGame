@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 
-// vector<vector<pair<int,bool>>> equivalent
+// 5x5 grid -> { value, chosen }
 const makeEmptyGrid = () =>
   Array.from({ length: 5 }, () =>
     Array.from({ length: 5 }, () => ({ value: null, chosen: false })),
   );
 
-const Grid = ({ onStartGame }) => {
+const Grid = ({ onDone }) => {
   const [grid, setGrid] = useState(makeEmptyGrid());
   const [duplicates, setDuplicates] = useState(new Set());
 
+  // check duplicates
   const recomputeDuplicates = (nextGrid) => {
     const freq = new Map();
 
@@ -38,6 +39,7 @@ const Grid = ({ onStartGame }) => {
     });
   };
 
+  // 🎲 RANDOM GRID
   const randomBox = () => {
     const newGrid = makeEmptyGrid();
     const used = new Set();
@@ -58,15 +60,13 @@ const Grid = ({ onStartGame }) => {
     setDuplicates(new Set());
   };
 
-  // ✅ GO TO GAME
-  const requestGame = () => {
-    // duplicate check
+  // ➡️ CONTINUE FLOW
+  const continueNext = () => {
     if (duplicates.size > 0) {
       alert("Duplicate numbers are not allowed");
       return;
     }
 
-    // empty cell check
     for (let r = 0; r < 5; r++) {
       for (let c = 0; c < 5; c++) {
         if (grid[r][c].value === null) {
@@ -77,12 +77,12 @@ const Grid = ({ onStartGame }) => {
     }
 
     // send grid to App.jsx
-    onStartGame(grid);
+    onDone(grid);
   };
 
   return (
-    <div style={{ maxWidth: 360, margin: "auto" }}>
-      <h3 style={{ textAlign: "center" }}>Bingo Grid Setup</h3>
+    <div style={{ maxWidth: 360, margin: "40px auto" }}>
+      <h3 style={{ textAlign: "center" }}>Create Your Bingo Grid</h3>
 
       <div
         style={{
@@ -121,8 +121,8 @@ const Grid = ({ onStartGame }) => {
         Random Box
       </button>
 
-      <button onClick={requestGame} style={{ marginTop: 8, width: "100%" }}>
-        Go To Game
+      <button onClick={continueNext} style={{ marginTop: 8, width: "100%" }}>
+        Continue
       </button>
     </div>
   );
