@@ -1,50 +1,4 @@
-// import React, { useState } from "react";
-// import Home from "./pages/Home";
-// import Login from "./pages/Login";
-// import Register from "./pages/Register";
-// import Grid from "./pages/Grid";
-// import Game from "./pages/Game";
-// import SetPassword from "./pages/SetPassword";
-
-// const App = () => {
-//   const [page, setPage] = useState("login");
-//   const [gameGrid, setGameGrid] = useState(null);
-
-//   return (
-//     <div>
-//       {page === "login" && (
-//         <Login
-//           onLogin={(next) => setPage(next || "input")}
-//           onRegister={() => setPage("register")}
-//         />
-//       )}
-
-//       {page === "register" && (
-//         <Register onRegister={(next) => setPage(next || "input")} />
-//       )}
-
-//       {page === "set-password" && (
-//         <SetPassword onDone={() => setPage("input")} />
-//       )}
-
-//       {page === "input" && (
-//         <Grid
-//           onStartGame={(grid) => {
-//             setGameGrid(grid);
-//             setPage("game");
-//           }}
-//         />
-//       )}
-
-//       {page === "game" && <Game grid={gameGrid} />}
-//     </div>
-//   );
-// };
-
-// export default App;
-
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SetPassword from "./pages/SetPassword";
@@ -55,46 +9,44 @@ import JoinRoom from "./pages/JoinRoom";
 import Lobby from "./pages/Lobby";
 import Game from "./pages/Game";
 import Result from "./pages/Result";
-import { useEffect } from "react";
 import { socket } from "./services/socket";
-
-useEffect(() => {
-  if (!roomId) return;
-
-  // jab koi player join karta hai
-  socket.on("room-joined", (updatedPlayers) => {
-    console.log("Players updated:", updatedPlayers);
-    setPlayers(updatedPlayers); // players state update hoti hai
-  });
-
-  // jab game start hota hai
-  socket.on("game-start", () => {
-    setPage("game");
-  });
-
-  return () => {
-    socket.off("room-joined");
-    socket.off("game-start");
-  };
-}, [roomId]);
 
 const App = () => {
   const [page, setPage] = useState("login");
-
-  const [mode, setMode] = useState(null); // create | join
+  const [mode, setMode] = useState(null);
   const [roomId, setRoomId] = useState(null);
   const [gameGrid, setGameGrid] = useState(null);
-  const [players, setPlayers] = useState([]); // NEW
-
-  // RESULT STATE
+  const [players, setPlayers] = useState([]);
+  const [user, setUser] = useState(null);
   const [winner, setWinner] = useState(null);
   const [isDraw, setIsDraw] = useState(false);
+
+  // ✅ Correct useEffect INSIDE COMPONENT
+  useEffect(() => {
+    if (!roomId) return;
+
+    socket.on("room-joined", (updatedPlayers) => {
+      console.log("Players updated:", updatedPlayers);
+      setPlayers(updatedPlayers);
+    });
+
+    socket.on("game-start", () => setPage("game"));
+
+    return () => {
+      socket.off("room-joined");
+      socket.off("game-start");
+    };
+  }, [roomId]);
 
   return (
     <div>
       {page === "login" && (
         <Login
-          onLogin={() => setPage("home")}
+          onLogin={(userData) => {
+            // assume Login return karta user object
+            setUser(userData);
+            setPage("home");
+          }}
           onRegister={() => setPage("register")}
         />
       )}
@@ -132,6 +84,7 @@ const App = () => {
       {page === "create-room" && (
         <CreateRoom
           grid={gameGrid}
+          user={user}
           onCreated={(id) => {
             setRoomId(id);
             setPage("lobby");
@@ -142,6 +95,7 @@ const App = () => {
       {page === "join-room" && (
         <JoinRoom
           grid={gameGrid}
+          user={user}
           onJoined={(id) => {
             setRoomId(id);
             setPage("lobby");

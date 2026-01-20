@@ -6,12 +6,10 @@ export default function initSocket(io) {
 
     // ================= JOIN ROOM =================
     socket.on("join-room", ({ roomId, user }) => {
-      console.log("join-room:", roomId, user.name);
-
       const room = rooms.get(roomId);
       if (!room) return;
 
-      // prevent duplicate join
+      // prevent duplicate
       const alreadyJoined = room.players.find((p) => p.id === user.id);
       if (alreadyJoined) return;
 
@@ -25,7 +23,7 @@ export default function initSocket(io) {
 
       room.grids[user.id] = user.grid.flat();
 
-      io.to(roomId).emit("room-joined", room.players);
+      io.to(roomId).emit("room-joined", room.players); // broadcast to both
     });
 
     // ================= START GAME =================

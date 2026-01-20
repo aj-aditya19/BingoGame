@@ -1,32 +1,27 @@
 import React, { useState } from "react";
-import { useEffect } from "react";
 import { socket } from "../services/socket";
 
-// CreateRoom.jsx / JoinRoom.jsx ke andar
-useEffect(() => {
-  if (!roomId || !grid || !user) return; // check essential data
-
-  socket.emit("join-room", {
-    roomId,
-    user: {
-      id: user._id, // unique player id
-      name: user.name,
-      grid, // player ka grid
-    },
-  });
-}, [roomId, grid, user]);
-
-const JoinRoom = ({ grid, onJoined }) => {
+const JoinRoom = ({ grid, user, onJoined }) => {
   const [roomId, setRoomId] = useState("");
 
   const joinRoom = () => {
-    if (roomId.trim().length !== 7) {
+    const id = roomId.trim();
+    if (id.length !== 7) {
       alert("Invalid Room ID");
       return;
     }
 
-    // future me backend validation aayega
-    onJoined(roomId.trim());
+    // ✅ emit join-room only when user clicks "Join Game"
+    socket.emit("join-room", {
+      roomId: id,
+      user: {
+        id: user._id,
+        name: user.name,
+        grid,
+      },
+    });
+
+    onJoined(id); // App.jsx me roomId set hota hai → lobby show
   };
 
   return (

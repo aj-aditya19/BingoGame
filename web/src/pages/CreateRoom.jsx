@@ -1,35 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { socket } from "../services/socket";
-
-// CreateRoom.jsx / JoinRoom.jsx ke andar
-useEffect(() => {
-  if (!roomId || !grid || !user) return; // check essential data
-
-  socket.emit("join-room", {
-    roomId,
-    user: {
-      id: user._id, // unique player id
-      name: user.name,
-      grid, // player ka grid
-    },
-  });
-}, [roomId, grid, user]);
 
 const generateRoomId = () => {
   return Math.random().toString(36).substring(2, 9); // length = 7
 };
 
-const CreateRoom = ({ grid, onCreated }) => {
+const CreateRoom = ({ grid, user, onCreated }) => {
   const [roomId, setRoomId] = useState("");
 
+  // generate room id once
   useEffect(() => {
     const id = generateRoomId();
     setRoomId(id);
   }, []);
 
+  // emit join-room event when roomId, grid, user are ready
+  useEffect(() => {
+    if (!roomId || !grid || !user) return;
+
+    socket.emit("join-room", {
+      roomId,
+      user: {
+        id: user._id,
+        name: user.name,
+        grid,
+      },
+    });
+  }, [roomId, grid, user]);
+
   const continueGame = () => {
-    // yahan future me backend / socket aayega
     onCreated(roomId);
   };
 
