@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import { socket } from "../services/socket";
+import { gameApi } from "../services/api"; // ✅ THIS WAS MISSING
 
 const JoinRoom = ({ grid, user, onJoined }) => {
   const [roomId, setRoomId] = useState("");
 
-  const joinRoom = () => {
-    const id = roomId.trim();
-    if (id.length !== 7) {
-      alert("Invalid Room ID");
+  const joinRoom = async () => {
+    const res = await gameApi.joinRoom(roomId);
+
+    if (!res.success) {
+      alert(res.message);
       return;
     }
 
-    // ✅ emit join-room only when user clicks "Join Game"
     socket.emit("join-room", {
-      roomId: id,
+      roomId,
       user: {
         id: user._id,
         name: user.name,
@@ -21,7 +22,7 @@ const JoinRoom = ({ grid, user, onJoined }) => {
       },
     });
 
-    onJoined(id); // App.jsx me roomId set hota hai → lobby show
+    onJoined(roomId);
   };
 
   return (

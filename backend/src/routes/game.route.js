@@ -1,19 +1,20 @@
 import express from "express";
 
 const router = express.Router();
-
-// in-memory rooms
 const rooms = new Map();
 
 const genRoomId = () => Math.random().toString(36).substring(2, 9);
 
 // CREATE ROOM
-router.post("/create-room", (req, res) => {
+router.post("/room/create", (req, res) => {
+  console.log("In creating room");
+
   const roomId = genRoomId();
 
   rooms.set(roomId, {
     roomId,
     players: [],
+    hostUserId: null,
     grids: {},
     turnIndex: 0,
     started: false,
@@ -23,7 +24,7 @@ router.post("/create-room", (req, res) => {
 });
 
 // JOIN ROOM
-router.post("/join-room", (req, res) => {
+router.post("/room/join", (req, res) => {
   const { roomId } = req.body;
   const room = rooms.get(roomId);
 

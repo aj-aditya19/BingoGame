@@ -47,21 +47,25 @@ export const api = {
 };
 export const gameApi = {
   createRoom: async () => {
-    const res = await fetch(`${BASE_URL}/room/create`, {
+    console.log("In creating a Room");
+
+    const res = await fetch(`${BASE_URL}/game/room/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
+
     return res.json();
   },
 
   joinRoom: async (roomId) => {
-    const res = await fetch(`${BASE_URL}/room/join`, {
+    const res = await fetch(`${BASE_URL}/game/room/join`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ roomId }),
     });
+
     return res.json();
   },
 };

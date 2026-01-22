@@ -66,11 +66,11 @@ router.post("/google", async (req, res) => {
 });
 
 router.post("/set-password", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ success: false });
+  if (!req.session.user) return res.status(401).json({ success: false });
 
   const { password } = req.body;
 
-  await User.findByIdAndUpdate(req.session.userId, { password });
+  await User.findByIdAndUpdate(req.session.user.id, { password });
 
   res.json({ success: true });
 });

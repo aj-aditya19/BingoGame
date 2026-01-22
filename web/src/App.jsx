@@ -13,52 +13,73 @@ import { socket } from "./services/socket";
 
 const App = () => {
   const [page, setPage] = useState("login");
-  const [mode, setMode] = useState(null);
+  const [mode, setMode] = useState(null); // create | join
   const [roomId, setRoomId] = useState(null);
   const [gameGrid, setGameGrid] = useState(null);
   const [players, setPlayers] = useState([]);
-  const [user, setUser] = useState(null);
   const [winner, setWinner] = useState(null);
   const [isDraw, setIsDraw] = useState(false);
+  const [initialTurnUserId, setInitialTurnUserId] = useState(null);
 
-  // ✅ Correct useEffect INSIDE COMPONENT
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  /* =======================
+     AUTH SAFETY
+  ======================= */
   useEffect(() => {
-    if (!roomId) return;
+    if (!user) {
+      setPage("login");
+    }
+  }, [user]);
 
+  /* =======================
+     SOCKET LISTENERS (ONCE)
+  ======================= */
+  useEffect(() => {
     socket.on("room-joined", (updatedPlayers) => {
       console.log("Players updated:", updatedPlayers);
       setPlayers(updatedPlayers);
     });
 
-    socket.on("game-start", () => setPage("game"));
+    socket.on("game-start", ({ turnUserId }) => {
+      setInitialTurnUserId(turnUserId); // ⭐ IMPORTANT
+      setPage("game");
+    });
 
     return () => {
       socket.off("room-joined");
       socket.off("game-start");
     };
-  }, [roomId]);
+  }, []);
 
   return (
     <div>
+      {/* LOGIN */}
       {page === "login" && (
         <Login
           onLogin={(userData) => {
-            // assume Login return karta user object
             setUser(userData);
+            localStorage.setItem("user", JSON.stringify(userData));
             setPage("home");
           }}
           onRegister={() => setPage("register")}
         />
       )}
 
+      {/* REGISTER */}
       {page === "register" && (
         <Register onRegister={() => setPage("set-password")} />
       )}
 
+      {/* SET PASSWORD */}
       {page === "set-password" && (
         <SetPassword onDone={() => setPage("home")} />
       )}
 
+      {/* HOME */}
       {page === "home" && (
         <GameHome
           onCreateRoom={() => {
@@ -72,6 +93,7 @@ const App = () => {
         />
       )}
 
+      {/* GRID */}
       {page === "grid" && (
         <Grid
           onDone={(grid) => {
@@ -81,6 +103,7 @@ const App = () => {
         />
       )}
 
+      {/* CREATE ROOM */}
       {page === "create-room" && (
         <CreateRoom
           grid={gameGrid}
@@ -92,6 +115,7 @@ const App = () => {
         />
       )}
 
+      {/* JOIN ROOM */}
       {page === "join-room" && (
         <JoinRoom
           grid={gameGrid}
@@ -103,20 +127,26 @@ const App = () => {
         />
       )}
 
+      {/* LOBBY */}
       {page === "lobby" && (
         <Lobby
           roomId={roomId}
           isHost={mode === "create"}
-          player1={players[0]}
-          player2={players[1]}
-          onStartGame={() => setPage("game")}
+          player1={players?.[0] || null}
+          player2={players?.[1] || null}
+          onStartGame={() => {
+            socket.emit("start-game", { roomId });
+          }}
         />
       )}
 
-      {page === "game" && (
+      {/* GAME */}
+      {page === "game" && roomId && gameGrid && (
         <Game
           roomId={roomId}
-          grid={gameGrid}
+          initialGrid={gameGrid}
+          myUserId={user._id}
+          initialTurnUserId={initialTurnUserId}
           onGameEnd={({ winnerName, draw }) => {
             setWinner(winnerName);
             setIsDraw(draw);
@@ -125,17 +155,18 @@ const App = () => {
         />
       )}
 
+      {/* RESULT */}
       {page === "result" && (
         <Result
           winner={winner}
           isDraw={isDraw}
           onPlayAgain={() => {
-            // reset minimal state
             setWinner(null);
             setIsDraw(false);
             setGameGrid(null);
             setRoomId(null);
             setMode(null);
+            setPlayers([]);
             setPage("home");
           }}
         />

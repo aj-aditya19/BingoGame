@@ -1,72 +1,86 @@
 import { rooms } from "../routes/game.route.js";
 
-export default function initSocket(io) {
+const initSocket = (io) => {
   io.on("connection", (socket) => {
-    console.log("Socket connected:", socket.id);
+    console.log("User connected:", socket.id);
 
-    // ================= JOIN ROOM =================
     socket.on("join-room", ({ roomId, user }) => {
       const room = rooms.get(roomId);
       if (!room) return;
 
-      // prevent duplicate
-      const alreadyJoined = room.players.find((p) => p.id === user.id);
+      // ❌ duplicate join prevent
+      const alreadyJoined = room.players.find((p) => p.socketId === socket.id);
       if (alreadyJoined) return;
 
+      if (room.players.length >= 2) return;
+      // ✅ join socket room
       socket.join(roomId);
 
+      // ✅ add player
+      const playerNo = room.players.length + 1;
+
       room.players.push({
-        id: user.id,
+        userId: user.id,
         name: user.name,
         socketId: socket.id,
+        grid: user.grid,
+        playerNo,
       });
+      console.log("Room:", roomId, room.players);
 
-      room.grids[user.id] = user.grid.flat();
-
-      io.to(roomId).emit("room-joined", room.players); // broadcast to both
+      // 🔥 SEND UPDATED PLAYERS TO BOTH USERS
+      io.to(roomId).emit("room-joined", room.players);
     });
 
-    // ================= START GAME =================
+    /* ================= START GAME ================= */
     socket.on("start-game", ({ roomId }) => {
       const room = rooms.get(roomId);
-      if (!room || room.players.length < 2) return;
+      if (!room || room.players.length !== 2) return;
 
       room.started = true;
-      room.turnIndex = Math.floor(Math.random() * 2);
+
+      // ✅ Player 1 always starts
+      const firstPlayer = room.players.find((p) => p.playerNo === 1);
+      room.turnUserId = firstPlayer.userId;
 
       io.to(roomId).emit("game-start", {
-        currentTurn: room.players[room.turnIndex].id,
+        turnUserId: room.turnUserId,
       });
     });
 
-    // ================= MARK NUMBER =================
-    socket.on("mark-number", ({ roomId, userId, value }) => {
+    /* ================= SELECT NUMBER ================= */
+    socket.on("game:select-number", ({ roomId, number, userId }) => {
       const room = rooms.get(roomId);
-      if (!room) return;
+      if (!room || room.turnUserId !== userId) return;
 
-      const currentPlayer = room.players[room.turnIndex];
-      if (currentPlayer.id !== userId) return;
+      io.to(roomId).emit("game:update", { number });
 
-      Object.keys(room.grids).forEach((uid) => {
-        room.grids[uid] = room.grids[uid].map((cell) =>
-          cell.value === value && !cell.marked
-            ? { ...cell, marked: true }
-            : cell,
-        );
-      });
+      const nextPlayer = room.players.find((p) => p.userId !== userId);
+      room.turnUserId = nextPlayer.userId;
 
-      room.turnIndex = room.turnIndex === 0 ? 1 : 0;
-
-      io.to(roomId).emit("grid-update", {
-        grids: room.grids,
-        nextTurn: room.players[room.turnIndex].id,
-        markedValue: value,
-      });
+      io.to(roomId).emit("game:turn", { userId: room.turnUserId });
     });
 
-    // ================= DISCONNECT =================
+    socket.on("game:win", ({ roomId, userId }) => {
+      const room = rooms.get(roomId);
+      if (!room || room.winnerUserId) return;
+
+      room.winnerUserId = userId;
+      io.to(roomId).emit("game:win", { userId });
+    });
+
+    /* ================= DISCONNECT ================= */
     socket.on("disconnect", () => {
-      console.log("Socket disconnected:", socket.id);
+      for (const [roomId, room] of rooms.entries()) {
+        const idx = room.players.findIndex((p) => p.socketId === socket.id);
+
+        if (idx !== -1) {
+          room.players.splice(idx, 1);
+          io.to(roomId).emit("room-joined", room.players);
+        }
+      }
     });
   });
-}
+};
+
+export default initSocket;

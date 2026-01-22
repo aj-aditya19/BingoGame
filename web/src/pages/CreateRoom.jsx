@@ -1,61 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { socket } from "../services/socket";
-
-const generateRoomId = () => {
-  return Math.random().toString(36).substring(2, 9); // length = 7
-};
+import { gameApi } from "../services/api";
 
 const CreateRoom = ({ grid, user, onCreated }) => {
-  const [roomId, setRoomId] = useState("");
+  const [roomId, setRoomId] = useState(null);
 
-  // generate room id once
+  // 🔥 CREATE ROOM ON SERVER
   useEffect(() => {
-    const id = generateRoomId();
-    setRoomId(id);
+    const create = async () => {
+      const res = await gameApi.createRoom();
+      if (!res.success) return;
+
+      setRoomId(res.roomId);
+
+      socket.emit("join-room", {
+        roomId: res.roomId,
+        user: {
+          id: user._id,
+          name: user.name,
+          grid,
+        },
+      });
+    };
+
+    create();
   }, []);
 
-  // emit join-room event when roomId, grid, user are ready
-  useEffect(() => {
-    if (!roomId || !grid || !user) return;
-
-    socket.emit("join-room", {
-      roomId,
-      user: {
-        id: user._id,
-        name: user.name,
-        grid,
-      },
-    });
-  }, [roomId, grid, user]);
-
-  const continueGame = () => {
-    onCreated(roomId);
-  };
+  if (!roomId) return <p>Creating room...</p>;
 
   return (
-    <div style={{ maxWidth: 360, margin: "40px auto", textAlign: "center" }}>
+    <div style={{ textAlign: "center" }}>
       <h3>Room Created</h3>
+      <h2>{roomId}</h2>
 
-      <p>
-        <b>Room ID:</b>
-      </p>
-      <div
-        style={{
-          padding: "10px",
-          border: "1px solid #ccc",
-          borderRadius: 6,
-          marginBottom: 10,
-          fontSize: 18,
-        }}
-      >
-        {roomId}
-      </div>
-
-      <p style={{ fontSize: 14 }}>Share this Room ID with your friend</p>
-
-      <button onClick={continueGame} style={{ width: "100%" }}>
-        Go To Game
-      </button>
+      <button onClick={() => onCreated(roomId)}>Go To Lobby</button>
     </div>
   );
 };
