@@ -39,7 +39,7 @@ const initSocket = (io) => {
       if (!room || room.players.length !== 2) return;
 
       room.started = true;
-
+      room.winnerUserId = null;
       // ✅ Player 1 always starts
       const firstPlayer = room.players.find((p) => p.role === "Host");
       room.turnUserId = firstPlayer.userId;
@@ -55,9 +55,17 @@ const initSocket = (io) => {
       const room = rooms.get(roomId);
       if (!room || room.turnUserId !== userId) return;
 
+      // Emit number update
       io.to(roomId).emit("game:update", { number });
 
+      // Find next player safely
       const nextPlayer = room.players.find((p) => p.userId !== userId);
+
+      if (!nextPlayer) {
+        console.log("⚠️ No next player found, maybe someone left?");
+        return; // stop execution
+      }
+
       room.turnUserId = nextPlayer.userId;
 
       io.to(roomId).emit("game:turn", { userId: room.turnUserId });
@@ -77,6 +85,25 @@ const initSocket = (io) => {
         console.log("Room deleted:", roomId);
       }, 7000);
     });
+    socket.on("leave-room", ({ roomId }) => {
+      const room = rooms.get(roomId);
+      if (!room) return;
+
+      socket.leave(roomId);
+
+      // remove player from room
+      room.players = room.players.filter((p) => p.socketId !== socket.id);
+
+      io.to(roomId).emit("room-joined", room.players);
+
+      // agar room empty ho gaya to delete
+      if (room.players.length === 0) {
+        rooms.delete(roomId);
+        console.log("🧹 Room deleted (empty):", roomId);
+      }
+
+      console.log("👋 socket left room:", roomId);
+    });
 
     /* ================= DISCONNECT ================= */
     socket.on("disconnect", () => {
@@ -86,6 +113,12 @@ const initSocket = (io) => {
         if (idx !== -1) {
           room.players.splice(idx, 1);
           io.to(roomId).emit("room-joined", room.players);
+
+          // ✅ ADD THIS
+          if (room.players.length === 0) {
+            rooms.delete(roomId);
+            console.log("🧹 Room deleted on disconnect:", roomId);
+          }
         }
       }
     });

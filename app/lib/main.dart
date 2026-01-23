@@ -1,76 +1,189 @@
 import 'package:flutter/material.dart';
-import 'pages/login_page.dart';
-import 'pages/register_page.dart';
-import 'pages/set_password_page.dart';
-import 'pages/grid_page.dart';
-import 'pages/game_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'services/firebase_service.dart';
+import 'pages/firebase_options.dart';
 
-void main() {
-  runApp(MyApp());
+import 'models/cell_model.dart';
+import 'pages/login_screen.dart';
+import 'pages/register_screen.dart';
+import 'pages/grid_screen.dart';
+import 'pages/game_home_screen.dart';
+import 'pages/create_room_screen.dart';
+import 'pages/join_room_screen.dart';
+import 'pages/lobby_screen.dart';
+import 'pages/game_screen.dart';
+import 'services/socket_service.dart';
+import 'pages/result_screen.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  SocketService().connect();
+  runApp(const BingoApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+// ✅ Enum for screens
+enum AppScreen {
+  login,
+  register,
+  grid,
+  home,
+  createRoom,
+  joinRoom,
+  lobby,
+  game,
+  result,
+}
+
+class BingoApp extends StatefulWidget {
+  const BingoApp({super.key});
+
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<BingoApp> createState() => _BingoAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  // This is like React's `useState("login")`
-  String currentPage = "login";
-  dynamic gameGrid; // to pass grid to game page
+class _BingoAppState extends State<BingoApp> {
+  AppScreen currentScreen = AppScreen.login;
 
-  void setPage(String page, {dynamic data}) {
-    setState(() {
-      currentPage = page;
-      if (page == "game") {
-        gameGrid = data; // store grid for GamePage
-      }
-    });
+  Map<String, dynamic>? user;
+
+  String? roomId;
+  List<List<CellModel>>? myGrid;
+  String? myUserId;
+
+  Map<String, dynamic>? gameResult;
+  String? initialTurnUserId;
+
+  void go(AppScreen screen) {
+    setState(() => currentScreen = screen);
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget pageWidget;
+    Widget screen;
 
-    switch (currentPage) {
-      case "login":
-        pageWidget = LoginPage(
-          onLogin: () => setPage("grid"),
-          onRegister: () => setPage("register"),
+    switch (currentScreen) {
+      case AppScreen.login:
+        screen = LoginScreen(
+          onLogin: (u) {
+            user = u;
+            myUserId = u["_id"];
+            go(AppScreen.grid);
+          },
+          onRegister: () => go(AppScreen.register),
         );
         break;
 
-      case "register":
-        pageWidget = RegisterPage(onRegister: () => setPage("login"));
+      case AppScreen.register:
+        void handleRegister([String? step]) {
+          go(AppScreen.login);
+        }
+        screen = RegisterScreen(onRegister: handleRegister);
+
         break;
 
-      case "set-password":
-        pageWidget = SetPasswordPage(onDone: () => setPage("grid"));
-        break;
-
-      case "grid":
-        pageWidget = GridPage(
-          onStartGame: (grid) => setPage("game", data: grid),
+      case AppScreen.grid:
+        screen = GridScreen(
+          onDone: (grid) {
+            myGrid = grid;
+            go(AppScreen.home);
+          },
         );
         break;
 
-      case "game":
-        pageWidget = GamePage(grid: gameGrid);
+      case AppScreen.home:
+        screen = GameHomeScreen(
+          onCreateRoom: () => go(AppScreen.createRoom),
+          onJoinRoom: () => go(AppScreen.joinRoom),
+        );
+        break;
+
+      case AppScreen.createRoom:
+        if (myGrid == null || user == null) {
+          screen = const Center(child: CircularProgressIndicator());
+          break;
+        }
+        screen = CreateRoomScreen(
+          grid: myGrid!,
+          user: user!,
+          onCreated: (id) {
+            roomId = id;
+            go(AppScreen.lobby);
+          },
+        );
+        break;
+
+      case AppScreen.joinRoom:
+        if (myGrid == null || user == null) {
+          screen = const Center(child: CircularProgressIndicator());
+          break;
+        }
+        screen = JoinRoomScreen(
+          grid: myGrid!,
+          user: user!,
+          onJoined: (id) {
+            roomId = id;
+            go(AppScreen.lobby);
+          },
+        );
+        break;
+
+      case AppScreen.lobby:
+        if (roomId == null) {
+          screen = const Center(child: CircularProgressIndicator());
+          break;
+        }
+
+        screen = screen = LobbyScreen(
+          roomId: roomId!,
+          isHost: currentScreen == AppScreen.createRoom,
+          user: user!,
+          myGrid: myGrid!,
+          onStartGame: (String turnUserId) {
+            initialTurnUserId = turnUserId;
+            go(AppScreen.game);
+          },
+        );
+
+        break;
+
+      case AppScreen.game:
+        if (roomId == null || myGrid == null || myUserId == null) {
+          screen = const Center(child: CircularProgressIndicator());
+          break;
+        }
+        screen = GameScreen(
+          roomId: roomId!,
+          initialGrid: myGrid!,
+          myUserId: myUserId!,
+          initialTurnUserId: initialTurnUserId!,
+          onGameEnd: (result) {
+            gameResult = Map<String, dynamic>.from(result);
+            go(AppScreen.result);
+          },
+        );
+        break;
+
+      case AppScreen.result:
+        if (gameResult == null) {
+          screen = const Center(child: CircularProgressIndicator());
+          break;
+        }
+        screen = ResultScreen(
+          winner: gameResult!["winnerName"],
+          isDraw: gameResult!["draw"],
+          onPlayAgain: () {
+            roomId = null;
+            gameResult = null;
+            go(AppScreen.home);
+          },
+        );
         break;
 
       default:
-        pageWidget = LoginPage(
-          onLogin: () => setPage("grid"),
-          onRegister: () => setPage("register"),
-        );
+        screen = const SizedBox();
     }
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Bingo App',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: Scaffold(body: pageWidget),
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, home: screen);
   }
 }
