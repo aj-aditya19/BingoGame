@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { socket } from "../services/socket";
 
-const Game = ({ roomId, initialGrid, myUserId }) => {
+const Game = ({
+  roomId,
+  initialGrid,
+  myUserId,
+  initialTurnUserId,
+  onGameEnd,
+}) => {
   const [grid, setGrid] = useState(initialGrid);
   const [currentTurn, setCurrentTurn] = useState(null);
   const [winner, setWinner] = useState(null);
 
-  // ------------------------
-  // Socket listeners
-  // ------------------------
+  useEffect(() => {
+    if (initialTurnUserId) {
+      setCurrentTurn(initialTurnUserId);
+    }
+  }, [initialTurnUserId]);
+
   useEffect(() => {
     const onGameStart = ({ turnUserId }) => {
       setCurrentTurn(turnUserId);
@@ -19,11 +28,32 @@ const Game = ({ roomId, initialGrid, myUserId }) => {
     };
 
     const onUpdate = ({ number }) => {
-      markNumber(number);
+      setGrid((prev) => {
+        const updated = prev.map((row) =>
+          row.map((cell) =>
+            cell.value === number ? { ...cell, chosen: true } : cell,
+          ),
+        );
+
+        // ✅ ONLY current player can emit win
+        if (!winner && currentTurn === myUserId && checkWin(updated)) {
+          socket.emit("game:win", {
+            roomId,
+            userId: myUserId,
+          });
+        }
+
+        return updated;
+      });
     };
 
     const onWin = ({ userId }) => {
       setWinner(userId);
+
+      onGameEnd({
+        winnerName: userId === myUserId ? "You" : "Opponent",
+        draw: false,
+      });
     };
 
     socket.on("game-start", onGameStart);
@@ -37,29 +67,10 @@ const Game = ({ roomId, initialGrid, myUserId }) => {
       socket.off("game:update", onUpdate);
       socket.off("game:win", onWin);
     };
-  }, []);
+  }, [roomId, myUserId, winner, currentTurn, onGameEnd]);
 
-  // ------------------------
-  // Lock buttons based on current turn
-  // ------------------------
   const isLocked = currentTurn !== myUserId || !!winner;
 
-  // ------------------------
-  // Mark number in grid
-  // ------------------------
-  const markNumber = (num) => {
-    setGrid((prev) =>
-      prev.map((row) =>
-        row.map((cell) =>
-          cell.value === num ? { ...cell, chosen: true } : cell,
-        ),
-      ),
-    );
-  };
-
-  // ------------------------
-  // Select number
-  // ------------------------
   const selectNumber = (cell) => {
     if (isLocked) return;
     if (cell.chosen) return;
@@ -71,9 +82,6 @@ const Game = ({ roomId, initialGrid, myUserId }) => {
     });
   };
 
-  // ------------------------
-  // Check win condition
-  // ------------------------
   const checkWin = (grid) => {
     let count = 0;
 
@@ -94,19 +102,6 @@ const Game = ({ roomId, initialGrid, myUserId }) => {
     return count >= 5;
   };
 
-  // ------------------------
-  // Emit win only once
-  // ------------------------
-  useEffect(() => {
-    if (!winner && checkWin(grid)) {
-      setWinner(myUserId); // local win state
-      socket.emit("game:win", { roomId, userId: myUserId });
-    }
-  }, [grid, winner, myUserId, roomId]);
-
-  // ------------------------
-  // Render
-  // ------------------------
   return (
     <div style={{ maxWidth: 300, margin: "20px auto" }}>
       <h3 style={{ textAlign: "center" }}>

@@ -19,6 +19,7 @@ const CreateRoom = ({ grid, user, onCreated }) => {
           id: user._id,
           name: user.name,
           grid,
+          role: "Host",
         },
       });
     };

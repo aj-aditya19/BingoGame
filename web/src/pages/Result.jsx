@@ -1,6 +1,14 @@
 import React from "react";
+import { useEffect } from "react";
 
 const Result = ({ winner, isDraw, onPlayAgain }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onPlayAgain();
+    }, 7000);
+
+    return () => clearTimeout(timer);
+  }, [onPlayAgain]);
   return (
     <div
       style={{

@@ -16,6 +16,7 @@ router.post("/room/create", (req, res) => {
     players: [],
     hostUserId: null,
     grids: {},
+    role: null,
     turnIndex: 0,
     started: false,
   });

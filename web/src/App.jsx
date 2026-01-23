@@ -13,7 +13,7 @@ import { socket } from "./services/socket";
 
 const App = () => {
   const [page, setPage] = useState("login");
-  const [mode, setMode] = useState(null); // create | join
+  const [mode, setMode] = useState(null);
   const [roomId, setRoomId] = useState(null);
   const [gameGrid, setGameGrid] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -26,26 +26,21 @@ const App = () => {
     return saved ? JSON.parse(saved) : null;
   });
 
-  /* =======================
-     AUTH SAFETY
-  ======================= */
   useEffect(() => {
     if (!user) {
+      console.log("No user login go and login first.");
       setPage("login");
     }
   }, [user]);
 
-  /* =======================
-     SOCKET LISTENERS (ONCE)
-  ======================= */
   useEffect(() => {
     socket.on("room-joined", (updatedPlayers) => {
-      console.log("Players updated:", updatedPlayers);
+      console.log("Players updated: ", updatedPlayers);
       setPlayers(updatedPlayers);
     });
 
     socket.on("game-start", ({ turnUserId }) => {
-      setInitialTurnUserId(turnUserId); // ⭐ IMPORTANT
+      setInitialTurnUserId(turnUserId);
       setPage("game");
     });
 
@@ -57,76 +52,87 @@ const App = () => {
 
   return (
     <div>
-      {/* LOGIN */}
+      {/* LOGIN */}{" "}
       {page === "login" && (
         <Login
           onLogin={(userData) => {
             setUser(userData);
+            console.log("User logged in: ", userData);
             localStorage.setItem("user", JSON.stringify(userData));
             setPage("home");
           }}
           onRegister={() => setPage("register")}
         />
       )}
-
       {/* REGISTER */}
       {page === "register" && (
-        <Register onRegister={() => setPage("set-password")} />
+        <Register
+          onRegister={() => {
+            console.log("Registering user");
+            setPage("set-password");
+          }}
+        />
       )}
-
       {/* SET PASSWORD */}
       {page === "set-password" && (
-        <SetPassword onDone={() => setPage("home")} />
+        <SetPassword
+          onDone={() => {
+            console.log("Set password done");
+            console.log("User register as: ", user);
+            setPage("home");
+          }}
+        />
       )}
-
       {/* HOME */}
       {page === "home" && (
         <GameHome
           onCreateRoom={() => {
+            console.log("Creating room by the user: ", user.email);
             setMode("create");
             setPage("grid");
           }}
           onJoinRoom={() => {
+            user.role = "Invited";
+            console.log("Joining room by the user: ", user.email);
             setMode("join");
             setPage("grid");
           }}
         />
       )}
-
       {/* GRID */}
       {page === "grid" && (
         <Grid
           onDone={(grid) => {
+            console.log("Grid created");
             setGameGrid(grid);
             setPage(mode === "create" ? "create-room" : "join-room");
           }}
         />
       )}
-
       {/* CREATE ROOM */}
       {page === "create-room" && (
         <CreateRoom
           grid={gameGrid}
           user={user}
           onCreated={(id) => {
+            user.role = "Host";
             setRoomId(id);
             setPage("lobby");
           }}
         />
       )}
-
       {/* JOIN ROOM */}
       {page === "join-room" && (
         <JoinRoom
           grid={gameGrid}
           user={user}
           onJoined={(id) => {
+            user.role = "Invited";
             setRoomId(id);
             setPage("lobby");
           }}
         />
       )}
-
       {/* LOBBY */}
       {page === "lobby" && (
         <Lobby
@@ -139,22 +145,25 @@ const App = () => {
           }}
         />
       )}
-
       {/* GAME */}
-      {page === "game" && roomId && gameGrid && (
-        <Game
-          roomId={roomId}
-          initialGrid={gameGrid}
-          myUserId={user._id}
-          initialTurnUserId={initialTurnUserId}
-          onGameEnd={({ winnerName, draw }) => {
-            setWinner(winnerName);
-            setIsDraw(draw);
-            setPage("result");
-          }}
-        />
-      )}
-
+      {page === "game" &&
+        roomId &&
+        gameGrid &&
+        (console.log("Initial Turn Id: ", initialTurnUserId),
+        (
+          <Game
+            roomId={roomId}
+            initialGrid={gameGrid}
+            myUserId={user._id}
+            initialTurnUserId={initialTurnUserId}
+            onGameEnd={({ winnerName, draw }) => {
+              console.log("Initial Turn Id: ", initialTurnUserId);
+              setWinner(winnerName);
+              setIsDraw(draw);
+              setPage("result");
+            }}
+          />
+        ))}
       {/* RESULT */}
       {page === "result" && (
         <Result

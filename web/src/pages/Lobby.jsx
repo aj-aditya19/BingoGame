@@ -13,10 +13,14 @@ const Lobby = ({ roomId, isHost, player1, player2, onStartGame }) => {
       <div style={{ marginTop: 20 }}>
         <h4>Players</h4>
 
-        <div>✅ {player1?.name || "Player 1"} (Host)</div>
+        <div>
+          ✅ {player1?.name || "Player 1"} ({player1?.role || "Player"})
+        </div>
 
         <div>
-          {player2 ? `✅ ${player2.name}` : "⏳ Waiting for Player 2..."}
+          {player2
+            ? `✅ ${player2.name} (${player2.role || "Player"})`
+            : "⏳ Waiting for Player 2..."}
         </div>
       </div>
 

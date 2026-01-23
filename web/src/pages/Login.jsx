@@ -21,8 +21,8 @@ const Login = ({ onLogin, onRegister }) => {
 
     const res = await api.login(form);
     if (res.success) {
-      onLogin("input");
-      console.log("Login succsexfull");
+      onLogin(res.user);
+      console.log("Login successful");
     }
   };
 

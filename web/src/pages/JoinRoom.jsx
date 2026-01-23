@@ -19,6 +19,7 @@ const JoinRoom = ({ grid, user, onJoined }) => {
         id: user._id,
         name: user.name,
         grid,
+        role: "Invited",
       },
     });
 

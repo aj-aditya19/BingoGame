@@ -25,6 +25,7 @@ const initSocket = (io) => {
         socketId: socket.id,
         grid: user.grid,
         playerNo,
+        role: user.role,
       });
       console.log("Room:", roomId, room.players);
 
@@ -40,8 +41,9 @@ const initSocket = (io) => {
       room.started = true;
 
       // ✅ Player 1 always starts
-      const firstPlayer = room.players.find((p) => p.playerNo === 1);
+      const firstPlayer = room.players.find((p) => p.role === "Host");
       room.turnUserId = firstPlayer.userId;
+      console.log("Turn User ID: ", room.turnUserId);
 
       io.to(roomId).emit("game-start", {
         turnUserId: room.turnUserId,
@@ -66,7 +68,14 @@ const initSocket = (io) => {
       if (!room || room.winnerUserId) return;
 
       room.winnerUserId = userId;
+
       io.to(roomId).emit("game:win", { userId });
+
+      // 🧹 CLEANUP after 3 seconds
+      setTimeout(() => {
+        rooms.delete(roomId);
+        console.log("Room deleted:", roomId);
+      }, 7000);
     });
 
     /* ================= DISCONNECT ================= */
