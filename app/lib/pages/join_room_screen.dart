@@ -23,6 +23,14 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
   String roomId = "";
   final socket = SocketService().socket;
 
+  @override
+  void initState() {
+    super.initState();
+    print("Join room: ${widget.grid}\n");
+    print("User: ${widget.user}\n");
+    print("Socket: $socket\n");
+  }
+
   Future<void> _joinRoom() async {
     if (roomId.trim().isEmpty) return;
 
@@ -40,12 +48,8 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
         "id": widget.user["_id"],
         "name": widget.user["name"],
         "grid": widget.grid
-            .map(
-              (row) => row
-                  .map((cell) => {"value": cell.value, "chosen": cell.chosen})
-                  .toList(),
-            )
-            .toList(),
+            .map((row) => row.map((cell) => cell.toJson()).toList())
+            .toList(), // ✅ now each cell has value + marked
         "role": "Invited",
       },
     });

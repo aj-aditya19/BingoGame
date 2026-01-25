@@ -27,7 +27,10 @@ class _GridScreenState extends State<GridScreen> {
   }
 
   List<List<CellModel>> _makeEmptyGrid() {
-    return List.generate(5, (_) => List.generate(5, (_) => CellModel()));
+    return List.generate(
+      5,
+      (_) => List.generate(5, (_) => CellModel(value: -1)),
+    );
   }
 
   void _recomputeDuplicates() {
@@ -35,7 +38,7 @@ class _GridScreenState extends State<GridScreen> {
 
     for (var row in grid) {
       for (var cell in row) {
-        if (cell.value != null) {
+        if (cell.value != -1) {
           freq[cell.value!] = (freq[cell.value!] ?? 0) + 1;
         }
       }
@@ -51,7 +54,7 @@ class _GridScreenState extends State<GridScreen> {
 
   void _onChangeCell(int r, int c, String raw) {
     if (raw.isEmpty) {
-      grid[r][c].value = null;
+      grid[r][c].value = -1;
       _recomputeDuplicates();
       return;
     }

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
-
 import '../models/cell_model.dart';
 import '../services/socket_service.dart';
 
@@ -9,7 +7,7 @@ class LobbyScreen extends StatefulWidget {
   final bool isHost;
   final Map<String, dynamic> user;
   final List<List<CellModel>> myGrid;
-  final Function(String)? onStartGame;
+  final VoidCallback onStartGame;
 
   const LobbyScreen({
     super.key,
@@ -31,36 +29,33 @@ class _LobbyScreenState extends State<LobbyScreen> {
   Map<String, dynamic>? player2;
 
   @override
-  @override
   void initState() {
     super.initState();
-
-    socketService.connect();
-
-    // Wait until socket is actually connected
-    socketService.socket.onConnect((_) {
-      print("✅ Connected inside LobbyScreen");
-
-      // Emit join-room
-      socketService.socket.emit("join-room", {
-        "roomId": widget.roomId,
-        "user": {
-          "id": widget.user["_id"],
-          "name": widget.user["name"],
-          "grid": widget.myGrid
-              .map((row) => row.map((cell) => cell.toJson()).toList())
-              .toList(),
-          "role": widget.isHost ? "Host" : "Player",
-        },
-      });
-    });
-
-    // Room updates
+    print("Player1 = $player1\n");
+    print("RoomId: ${widget.roomId},\n isHost: ${widget.isHost}\n");
+    print("User info: ${widget.user}\n");
+    print("Grid length: ${widget.myGrid.length}\n");
+    // Listen to "room-joined" updates from server
     socketService.socket.on("room-joined", (players) {
       if (!mounted) return;
-      print("🔹 room-joined event: $players");
 
-      final list = List<Map<String, dynamic>>.from(players);
+      // Safe conversion for nested grid
+      final list = (players as List)
+          .map((p) => Map<String, dynamic>.from(p))
+          .toList();
+
+      for (var player in list) {
+        if (player["grid"] != null) {
+          final gridJson = (player["grid"] as List)
+              .map(
+                (row) => (row as List)
+                    .map((cell) => Map<String, dynamic>.from(cell))
+                    .toList(),
+              )
+              .toList();
+          player["grid"] = gridJson;
+        }
+      }
 
       setState(() {
         player1 = list.isNotEmpty ? list[0] : null;
@@ -68,20 +63,17 @@ class _LobbyScreenState extends State<LobbyScreen> {
       });
     });
 
-    // Game start
-    socketService.socket.on("game-start", (data) {
+    // Optional: listen for game start
+    socketService.socket.on("game-start", (_) {
       if (!mounted) return;
-      widget.onStartGame?.call(data["turnUserId"]);
+      widget.onStartGame();
     });
   }
 
   @override
   void dispose() {
-    socketService.socket.emit("leave-room", {"roomId": widget.roomId});
-
     socketService.socket.off("room-joined");
     socketService.socket.off("game-start");
-
     super.dispose();
   }
 
@@ -99,7 +91,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
             ),
             const SizedBox(height: 20),
 
-            /// 👥 PLAYERS
+            /// Players Section
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -108,19 +100,17 @@ class _LobbyScreenState extends State<LobbyScreen> {
               ),
             ),
             const SizedBox(height: 8),
-
             Text(
-              "✅ ${player1?["name"] ?? "Waiting..."} (${player1?["role"] ?? ""})",
+              "✅ ${player1?["name"] ?? "Player 1"} (${player1?["role"] ?? "Player"})",
             ),
             Text(
               player2 != null
-                  ? "✅ ${player2!["name"]} (${player2!["role"]})"
+                  ? "✅ ${player2!["name"]} (${player2!["role"] ?? "Player"})"
                   : "⏳ Waiting for Player 2...",
             ),
-
             const SizedBox(height: 20),
 
-            /// 🔢 GRID PREVIEW
+            /// Grid Preview
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -129,7 +119,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
               ),
             ),
             const SizedBox(height: 8),
-
             Row(
               children: [
                 Expanded(
@@ -144,25 +133,38 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
             const SizedBox(height: 24),
 
-            /// ▶ START GAME
-            if (widget.isHost && player2 != null)
-              SizedBox(
+            /// Rules (optional, like React)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text("Rules", style: TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(height: 6),
+                Text("• Players take turns"),
+                Text("• Strike numbers one by one"),
+                Text("• Complete BINGO to win"),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            /// Start Button
+            Visibility(
+              visible: widget.isHost && player2 != null,
+              child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    socketService.socket.emit("start-game", {
-                      "roomId": widget.roomId,
-                    });
-                  },
+                  onPressed: widget.onStartGame,
                   child: const Text("Let's Play"),
                 ),
               ),
-
-            if (widget.isHost && player2 == null)
-              const Padding(
+            ),
+            Visibility(
+              visible: widget.isHost && player2 == null,
+              child: const Padding(
                 padding: EdgeInsets.only(top: 12),
                 child: Text("Waiting for another player..."),
               ),
+            ),
           ],
         ),
       ),
@@ -170,19 +172,24 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 }
 
-/// ================= GRID PREVIEW =================
-
+/// GridPreview like React.js
 class GridPreview extends StatelessWidget {
   final String title;
-  final List<dynamic>? grid;
+  final List<dynamic>? grid; // JSON from socket
 
   const GridPreview({super.key, required this.title, this.grid});
 
   @override
   Widget build(BuildContext context) {
-    if (grid == null) {
-      return Text("$title: Not Ready");
-    }
+    if (grid == null) return Text("$title: Not Ready");
+
+    final List<List<CellModel>> typedGrid = grid!
+        .map<List<CellModel>>(
+          (row) => (row as List)
+              .map<CellModel>((cell) => CellModel.fromJson(cell))
+              .toList(),
+        )
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,14 +208,16 @@ class GridPreview extends StatelessWidget {
           itemBuilder: (context, index) {
             final r = index ~/ 5;
             final c = index % 5;
-            final cell = grid![r][c];
-            final value = cell["value"];
+            final cell = typedGrid[r][c];
 
             return Container(
               alignment: Alignment.center,
-              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                color: cell.marked ? Colors.greenAccent : Colors.white,
+              ),
               child: Text(
-                value?.toString() ?? "",
+                cell.value.toString(),
                 style: const TextStyle(fontSize: 12),
               ),
             );

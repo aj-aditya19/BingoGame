@@ -35,6 +35,10 @@ enum AppScreen {
   result,
 }
 
+enum GameMode { create, join }
+
+GameMode? mode;
+
 class BingoApp extends StatefulWidget {
   const BingoApp({super.key});
 
@@ -51,8 +55,21 @@ class _BingoAppState extends State<BingoApp> {
   List<List<CellModel>>? myGrid;
   String? myUserId;
 
+  bool isHost = false;
   Map<String, dynamic>? gameResult;
   String? initialTurnUserId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final socket = SocketService().socket;
+
+    socket.on("game-start", (data) {
+      initialTurnUserId = data["turnUserId"];
+      go(AppScreen.game);
+    });
+  }
 
   void go(AppScreen screen) {
     setState(() => currentScreen = screen);
@@ -68,7 +85,7 @@ class _BingoAppState extends State<BingoApp> {
           onLogin: (u) {
             user = u;
             myUserId = u["_id"];
-            go(AppScreen.grid);
+            go(AppScreen.home);
           },
           onRegister: () => go(AppScreen.register),
         );
@@ -82,19 +99,29 @@ class _BingoAppState extends State<BingoApp> {
 
         break;
 
-      case AppScreen.grid:
-        screen = GridScreen(
-          onDone: (grid) {
-            myGrid = grid;
-            go(AppScreen.home);
+      case AppScreen.home:
+        screen = GameHomeScreen(
+          onCreateRoom: () {
+            mode = GameMode.create;
+            go(AppScreen.grid);
+          },
+          onJoinRoom: () {
+            mode = GameMode.join;
+            go(AppScreen.grid);
           },
         );
         break;
 
-      case AppScreen.home:
-        screen = GameHomeScreen(
-          onCreateRoom: () => go(AppScreen.createRoom),
-          onJoinRoom: () => go(AppScreen.joinRoom),
+      case AppScreen.grid:
+        screen = GridScreen(
+          onDone: (grid) {
+            myGrid = grid;
+            go(
+              mode == GameMode.create
+                  ? AppScreen.createRoom
+                  : AppScreen.joinRoom,
+            );
+          },
         );
         break;
 
@@ -108,6 +135,7 @@ class _BingoAppState extends State<BingoApp> {
           user: user!,
           onCreated: (id) {
             roomId = id;
+            isHost = true;
             go(AppScreen.lobby);
           },
         );
@@ -123,6 +151,7 @@ class _BingoAppState extends State<BingoApp> {
           user: user!,
           onJoined: (id) {
             roomId = id;
+            isHost = false;
             go(AppScreen.lobby);
           },
         );
@@ -134,17 +163,15 @@ class _BingoAppState extends State<BingoApp> {
           break;
         }
 
-        screen = screen = LobbyScreen(
+        screen = LobbyScreen(
           roomId: roomId!,
-          isHost: currentScreen == AppScreen.createRoom,
+          isHost: isHost,
           user: user!,
           myGrid: myGrid!,
-          onStartGame: (String turnUserId) {
-            initialTurnUserId = turnUserId;
-            go(AppScreen.game);
+          onStartGame: () {
+            SocketService().socket.emit("start-game", {"roomId": roomId});
           },
         );
-
         break;
 
       case AppScreen.game:
@@ -159,6 +186,8 @@ class _BingoAppState extends State<BingoApp> {
           initialTurnUserId: initialTurnUserId!,
           onGameEnd: (result) {
             gameResult = Map<String, dynamic>.from(result);
+            print("Initial Grid Game Screen: $myGrid");
+            print("Game ended with result: $result");
             go(AppScreen.result);
           },
         );
@@ -175,6 +204,8 @@ class _BingoAppState extends State<BingoApp> {
           onPlayAgain: () {
             roomId = null;
             gameResult = null;
+            print("Game Result Declared\n");
+            print("Game Ended");
             go(AppScreen.home);
           },
         );

@@ -32,38 +32,36 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Initialize grid and reset chosen
     grid = widget.initialGrid
         .map(
           (row) => row
-              .map(
-                (cell) => CellModel(
-                  value: cell.value,
-                  chosen: false, // RESET
-                ),
-              )
+              .map((cell) => CellModel(value: cell.value, marked: false))
               .toList(),
         )
         .toList();
 
     currentTurn = widget.initialTurnUserId;
 
+    // Socket listeners
     socket.on("game:turn", (data) {
       setState(() => currentTurn = data["userId"]);
     });
 
     socket.on("game:update", (data) {
       final number = data["number"];
+      final playedBy = data["userId"];
       setState(() {
         for (var row in grid) {
           for (var cell in row) {
-            if (cell.value == number) {
-              cell.chosen = true;
-            }
+            if (cell.value == number) cell.marked = true;
           }
         }
       });
 
-      if (currentTurn == widget.myUserId && checkWin()) {
+      // Only current player can emit win
+      if (playedBy == widget.myUserId && checkWin()) {
         socket.emit("game:win", {
           "roomId": widget.roomId,
           "userId": widget.myUserId,
@@ -85,16 +83,13 @@ class _GameScreenState extends State<GameScreen> {
     socket.off("game:turn");
     socket.off("game:update");
     socket.off("game:win");
-
-    socket.emit("leave-room", {"roomId": widget.roomId});
-
     super.dispose();
   }
 
   bool get isLocked => currentTurn != widget.myUserId || winner != null;
 
   void selectNumber(CellModel cell) {
-    if (isLocked || cell.chosen) return;
+    if (isLocked || cell.marked) return;
 
     socket.emit("game:select-number", {
       "roomId": widget.roomId,
@@ -106,31 +101,32 @@ class _GameScreenState extends State<GameScreen> {
   bool checkWin() {
     int count = 0;
 
+    // Rows & Columns
     for (int i = 0; i < 5; i++) {
-      if (grid[i].every((c) => c.chosen)) count++;
-      if (grid.every((r) => r[i].chosen)) count++;
+      if (grid[i].every((c) => c.marked)) count++;
+      if (grid.every((r) => r[i].marked)) count++;
     }
 
-    if (List.generate(5, (i) => grid[i][i]).every((c) => c.chosen)) count++;
-    if (List.generate(5, (i) => grid[i][4 - i]).every((c) => c.chosen)) count++;
+    // Diagonals
+    if (List.generate(5, (i) => grid[i][i]).every((c) => c.marked)) count++;
+    if (List.generate(5, (i) => grid[i][4 - i]).every((c) => c.marked)) count++;
 
     return count >= 5;
   }
 
   @override
   Widget build(BuildContext context) {
+    String titleText;
+    if (winner != null) {
+      titleText = winner == widget.myUserId ? "🎉 You Win!" : "😢 You Lost";
+    } else {
+      titleText = currentTurn == widget.myUserId
+          ? "Your Turn"
+          : "Opponent Turn";
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          winner != null
-              ? winner == widget.myUserId
-                    ? "🎉 You Win!"
-                    : "😢 You Lost"
-              : currentTurn == widget.myUserId
-              ? "Your Turn"
-              : "Opponent Turn",
-        ),
-      ),
+      appBar: AppBar(title: Text(titleText)),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: 25,
@@ -142,16 +138,24 @@ class _GameScreenState extends State<GameScreen> {
           final c = index % 5;
           final cell = grid[r][c];
 
+          final bool marked = cell.marked; // 🔹 mark if chosen
+
           return GestureDetector(
             onTap: () => selectNumber(cell),
             child: Container(
               margin: const EdgeInsets.all(4),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: cell.chosen ? Colors.grey : Colors.white,
-                border: Border.all(),
+                border: Border.all(color: Colors.grey),
+                color: marked ? Colors.greenAccent : Colors.white, // 🔹 updated
               ),
-              child: Text(cell.value.toString()),
+              child: Text(
+                cell.value.toString(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           );
         },

@@ -9,27 +9,29 @@ const initSocket = (io) => {
       if (!room) return;
 
       // ❌ duplicate join prevent
-      const alreadyJoined = room.players.find((p) => p.socketId === socket.id);
-      if (alreadyJoined) return;
+      const existing = room.players.find((p) => p.userId === user.id);
+      if (existing) {
+        existing.socketId = socket.id;
+        existing.name = user.name ?? existing.name;
+        existing.grid = user.grid ?? existing.grid;
+        existing.role = user.role ?? existing.role;
+      } else {
+        if (room.players.length >= 2) {
+          console.log("Room full, cannot join", user.id);
+          return;
+        }
 
-      if (room.players.length >= 2) return;
-      // ✅ join socket room
+        room.players.push({
+          userId: user.id,
+          name: user.name ?? "Unknown",
+          socketId: socket.id,
+          grid: user.grid ?? [],
+          playerNo: room.players.length + 1,
+          role: user.role ?? "Invited",
+        });
+      }
+
       socket.join(roomId);
-
-      // ✅ add player
-      const playerNo = room.players.length + 1;
-
-      room.players.push({
-        userId: user.id,
-        name: user.name,
-        socketId: socket.id,
-        grid: user.grid,
-        playerNo,
-        role: user.role,
-      });
-      console.log("Room:", roomId, room.players);
-
-      // 🔥 SEND UPDATED PLAYERS TO BOTH USERS
       io.to(roomId).emit("room-joined", room.players);
     });
 
@@ -41,7 +43,8 @@ const initSocket = (io) => {
       room.started = true;
       room.winnerUserId = null;
       // ✅ Player 1 always starts
-      const firstPlayer = room.players.find((p) => p.role === "Host");
+      const firstPlayer =
+        room.players.find((p) => p.role === "Host") || room.players[0];
       room.turnUserId = firstPlayer.userId;
       console.log("Turn User ID: ", room.turnUserId);
 
@@ -59,15 +62,18 @@ const initSocket = (io) => {
       io.to(roomId).emit("game:update", { number });
 
       // Find next player safely
+      if (room.players.length < 2) {
+        console.log("⚠️ Waiting for opponent");
+        return;
+      }
       const nextPlayer = room.players.find((p) => p.userId !== userId);
 
       if (!nextPlayer) {
-        console.log("⚠️ No next player found, maybe someone left?");
-        return; // stop execution
+        console.log("⚠️ No next player found");
+        return;
       }
 
       room.turnUserId = nextPlayer.userId;
-
       io.to(roomId).emit("game:turn", { userId: room.turnUserId });
     });
 
@@ -108,16 +114,17 @@ const initSocket = (io) => {
     /* ================= DISCONNECT ================= */
     socket.on("disconnect", () => {
       for (const [roomId, room] of rooms.entries()) {
-        const idx = room.players.findIndex((p) => p.socketId === socket.id);
+        const leftPlayer = room.players.find((p) => p.socketId === socket.id);
 
-        if (idx !== -1) {
-          room.players.splice(idx, 1);
-          io.to(roomId).emit("room-joined", room.players);
+        if (leftPlayer) {
+          socket.leave(roomId); // 👈 add this
+          room.players = room.players.filter((p) => p.socketId !== socket.id);
 
-          // ✅ ADD THIS
-          if (room.players.length === 0) {
+          if (room.started && room.players.length === 1) {
+            io.to(roomId).emit("game:win", {
+              userId: room.players[0].userId,
+            });
             rooms.delete(roomId);
-            console.log("🧹 Room deleted on disconnect:", roomId);
           }
         }
       }

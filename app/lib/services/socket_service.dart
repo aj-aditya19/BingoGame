@@ -32,16 +32,18 @@ class SocketService {
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
-          .enableForceNew()
+          // .enableForceNew()
           .build(),
     );
 
     // Debug logs
-    socket.onConnect((_) => print("✅ Socket connected: ${socket.id}"));
-    socket.onConnectError((data) => print("❌ Connect error: $data"));
-    socket.onDisconnect((_) => print("❌ Socket disconnected"));
-    socket.onReconnect((_) => print("🔄 Reconnected"));
-    socket.onReconnectAttempt((_) => print("🔄 Reconnect attempt"));
+    socket.onConnect(
+      (_) => print("✅ Socket connected in flutter: ${socket.id}"),
+    );
+    socket.onConnectError((data) => print("❌ Connect error in flutter: $data"));
+    socket.onDisconnect((_) => print("❌ Socket disconnected in flutter"));
+    socket.onReconnect((_) => print("🔄 Reconnected in flutter"));
+    socket.onReconnectAttempt((_) => print("🔄 Reconnect attempt in flutter"));
   }
 
   void connect() {

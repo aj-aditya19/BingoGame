@@ -1,12 +1,12 @@
 class CellModel {
-  int? value;
-  bool chosen;
+  int value;
+  bool marked;
 
-  CellModel({this.value, this.chosen = false});
+  CellModel({required this.value, this.marked = false});
 
-  Map<String, dynamic> toJson() => {"value": value, "chosen": chosen};
+  Map<String, dynamic> toJson() => {"value": value, "marked": marked};
 
   factory CellModel.fromJson(Map<String, dynamic> json) {
-    return CellModel(value: json["value"], chosen: json["chosen"] ?? false);
+    return CellModel(value: json["value"], marked: json["marked"] ?? false);
   }
 }
