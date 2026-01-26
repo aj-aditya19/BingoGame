@@ -31,15 +31,21 @@ class _LobbyScreenState extends State<LobbyScreen> {
   @override
   void initState() {
     super.initState();
-    print("Player1 = $player1\n");
-    print("RoomId: ${widget.roomId},\n isHost: ${widget.isHost}\n");
-    print("User info: ${widget.user}\n");
-    print("Grid length: ${widget.myGrid.length}\n");
-    // Listen to "room-joined" updates from server
+
+    if (widget.isHost) {
+      player1 = {
+        "_id": widget.user["_id"],
+        "name": widget.user["name"],
+        "role": "Host",
+      };
+    }
+    print("Player1 in Lobby = $player1\n");
+    print("RoomId in LObby: ${widget.roomId},\nisHost: ${widget.isHost}\n");
+    print("User info in LObby: ${widget.user}\n");
+    print("Grid length in LObby: ${widget.myGrid.length}\n");
     socketService.socket.on("room-joined", (players) {
       if (!mounted) return;
 
-      // Safe conversion for nested grid
       final list = (players as List)
           .map((p) => Map<String, dynamic>.from(p))
           .toList();
@@ -63,11 +69,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
       });
     });
 
-    // Optional: listen for game start
-    socketService.socket.on("game-start", (_) {
-      if (!mounted) return;
-      widget.onStartGame();
-    });
+    // socketService.socket.on("game-start", (_) {
+    //   if (!mounted) return;
+    //   widget.onStartGame();
+    // });
   }
 
   @override
@@ -91,7 +96,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
             ),
             const SizedBox(height: 20),
 
-            /// Players Section
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -110,7 +114,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
             ),
             const SizedBox(height: 20),
 
-            /// Grid Preview
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -122,7 +125,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
             Row(
               children: [
                 Expanded(
-                  child: GridPreview(title: "Player 1", grid: player1?["grid"]),
+                  child: GridPreview(title: "Player 1", grid: widget.myGrid),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -133,7 +136,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
             const SizedBox(height: 24),
 
-            /// Rules (optional, like React)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
@@ -147,13 +149,16 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
             const SizedBox(height: 20),
 
-            /// Start Button
             Visibility(
               visible: widget.isHost && player2 != null,
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: widget.onStartGame,
+                  onPressed: () {
+                    SocketService().socket.emit("start-game", {
+                      "roomId": widget.roomId,
+                    });
+                  },
                   child: const Text("Let's Play"),
                 ),
               ),
@@ -172,10 +177,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 }
 
-/// GridPreview like React.js
 class GridPreview extends StatelessWidget {
   final String title;
-  final List<dynamic>? grid; // JSON from socket
+  final List<dynamic>? grid;
 
   const GridPreview({super.key, required this.title, this.grid});
 
@@ -183,13 +187,24 @@ class GridPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     if (grid == null) return Text("$title: Not Ready");
 
-    final List<List<CellModel>> typedGrid = grid!
-        .map<List<CellModel>>(
-          (row) => (row as List)
-              .map<CellModel>((cell) => CellModel.fromJson(cell))
-              .toList(),
-        )
-        .toList();
+    late final List<List<CellModel>> typedGrid;
+
+    // 🔥 FIX HERE
+    if (grid!.isNotEmpty && grid![0][0] is CellModel) {
+      // Player 1 (local grid)
+      typedGrid = grid!.cast<List<CellModel>>();
+    } else {
+      // Player 2 (socket JSON grid)
+      typedGrid = grid!
+          .map<List<CellModel>>(
+            (row) => (row as List)
+                .map<CellModel>(
+                  (cell) => CellModel.fromJson(Map<String, dynamic>.from(cell)),
+                )
+                .toList(),
+          )
+          .toList();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

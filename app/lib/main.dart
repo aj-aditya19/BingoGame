@@ -59,16 +59,49 @@ class _BingoAppState extends State<BingoApp> {
   Map<String, dynamic>? gameResult;
   String? initialTurnUserId;
 
+  late final dynamic _onGameStartHandler;
+
   @override
   void initState() {
     super.initState();
 
     final socket = SocketService().socket;
 
-    socket.on("game-start", (data) {
+    _onGameStartHandler = (data) {
       initialTurnUserId = data["turnUserId"];
       go(AppScreen.game);
+    };
+
+    socket.on("game-start", _onGameStartHandler);
+  }
+
+  @override
+  void dispose() {
+    final socket = SocketService().socket;
+    socket.off("game-start", _onGameStartHandler);
+    super.dispose();
+  }
+
+  void resetGame() {
+    final socket = SocketService().socket;
+
+    if (roomId != null) {
+      socket.emit("leave-room", {"roomId": roomId});
+    }
+
+    socket.off("game-start", _onGameStartHandler);
+
+    setState(() {
+      roomId = null;
+      myGrid = null;
+      isHost = false;
+      gameResult = null;
+      initialTurnUserId = null;
+      mode = null;
+      currentScreen = AppScreen.home;
     });
+
+    socket.on("game-start", _onGameStartHandler);
   }
 
   void go(AppScreen screen) {
@@ -169,13 +202,17 @@ class _BingoAppState extends State<BingoApp> {
           user: user!,
           myGrid: myGrid!,
           onStartGame: () {
+            print("User which is going to lobby: $user");
             SocketService().socket.emit("start-game", {"roomId": roomId});
           },
         );
         break;
 
       case AppScreen.game:
-        if (roomId == null || myGrid == null || myUserId == null) {
+        if (roomId == null ||
+            myGrid == null ||
+            myUserId == null ||
+            initialTurnUserId == null) {
           screen = const Center(child: CircularProgressIndicator());
           break;
         }
@@ -201,13 +238,7 @@ class _BingoAppState extends State<BingoApp> {
         screen = ResultScreen(
           winner: gameResult!["winnerName"],
           isDraw: gameResult!["draw"],
-          onPlayAgain: () {
-            roomId = null;
-            gameResult = null;
-            print("Game Result Declared\n");
-            print("Game Ended");
-            go(AppScreen.home);
-          },
+          onPlayAgain: resetGame,
         );
         break;
 

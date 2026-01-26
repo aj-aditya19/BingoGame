@@ -94,8 +94,8 @@ class _GridScreenState extends State<GridScreen> {
 
     for (var row in grid) {
       for (var cell in row) {
-        if (cell.value == null) {
-          _showAlert("Please fill all cells");
+        if (cell.value == -1) {
+          print("Please fill all cells");
           return;
         }
       }
@@ -150,7 +150,7 @@ class _GridScreenState extends State<GridScreen> {
                   final c = index % 5;
                   final cell = grid[r][c];
                   final isDup =
-                      cell.value != null && duplicates.contains(cell.value);
+                      cell.value != -1 && duplicates.contains(cell.value);
 
                   return TextField(
                     controller: controllers[r][c],
