@@ -15,18 +15,19 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
+const PORT = process.env.PORT || 5000;
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
+// const io = new Server(server, {
+//   cors: {
+//     origin: "*",
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//   },
+// });
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://your-frontend.vercel.app"],
     credentials: true,
   }),
 );
@@ -35,7 +36,7 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: "bingo-session",
+    secret: process.env.SESSION_SECRET || "bingo-session",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -51,12 +52,20 @@ app.use("/api", authRoutes);
 app.use("/api/game", gameRoutes);
 
 // socket init
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173", "https://your-frontend.vercel.app"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
 initSocket(io);
 
 app.get("/", (req, res) => {
   res.send("Bingo backend running");
 });
 
-server.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
