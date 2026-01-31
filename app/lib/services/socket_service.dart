@@ -44,7 +44,7 @@ class SocketService {
     socket.onDisconnect((_) => print("❌ Socket disconnected in flutter"));
     socket.onReconnect((_) => print("🔄 Reconnected in flutter"));
     socket.onReconnectAttempt((_) => print("🔄 Reconnect attempt in flutter"));
-  }
+  } 
 
   void connect() {
     if (!socket.connected) {
