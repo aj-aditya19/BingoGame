@@ -1,2 +1,7 @@
+# Firebase admin secret
+bingogame-ac21c-firebase-adminsdk-*.json
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+
+# Environment files
 .env
-.bingogame-ac21c-firebase-adminsdk-fbsvc-e8e248c49c.json
