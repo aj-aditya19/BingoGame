@@ -5,3 +5,29 @@ serviceAccountKey.json
 
 # Environment files
 .env
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+
+# VS Code
+.vscode/
+
+# Flutter / iOS / macOS build
+build/
+ios/Pods/
+ios/Runner/GeneratedPluginRegistrant.*
+macos/Pods/
+
+# Web
+web/.dart_tool/
+web/build/
+
+# OS
+.DS_Store
+Thumbs.db
