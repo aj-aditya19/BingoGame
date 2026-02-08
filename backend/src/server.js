@@ -1,7 +1,9 @@
+import "dotenv/config";
+
 import express from "express";
 import session from "express-session";
 import cors from "cors";
-import dotenv from "dotenv";
+
 import http from "http";
 import { Server } from "socket.io";
 
@@ -10,7 +12,6 @@ import authRoutes from "./routes/auth.route.js";
 import gameRoutes from "./routes/game.route.js";
 import initSocket from "./config/socket.js";
 
-dotenv.config();
 connectDB();
 
 const app = express();
