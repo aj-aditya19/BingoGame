@@ -37,13 +37,15 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "bingo-session",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production", // true on Render
+      sameSite: "none", // important for cross-origin frontend
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     },
   }),
 );
