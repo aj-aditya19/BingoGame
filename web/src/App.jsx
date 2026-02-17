@@ -68,7 +68,7 @@ const App = () => {
         <Register
           onRegister={() => {
             console.log("Registering user");
-            setPage("set-password");
+            setPage("home");
           }}
         />
       )}
