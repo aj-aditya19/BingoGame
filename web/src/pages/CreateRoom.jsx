@@ -27,8 +27,7 @@ const CreateRoom = ({ grid, user, onCreated }) => {
     create();
   }, []);
 
-  if (!roomId)
-    return <p className="create-room-loading">Creating room...</p>;
+  if (!roomId) return <p className="create-room-loading">Creating room...</p>;
 
   return (
     <div className="create-room-container">
@@ -36,10 +35,7 @@ const CreateRoom = ({ grid, user, onCreated }) => {
         <h3 className="create-room-title">Room Created</h3>
         <h2 className="create-room-id">{roomId}</h2>
 
-        <button
-          className="create-room-btn"
-          onClick={() => onCreated(roomId)}
-        >
+        <button className="create-room-btn" onClick={() => onCreated(roomId)}>
           Go To Lobby
         </button>
       </div>
