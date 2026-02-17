@@ -39,7 +39,7 @@ class _GridScreenState extends State<GridScreen> {
     for (var row in grid) {
       for (var cell in row) {
         if (cell.value != -1) {
-          freq[cell.value!] = (freq[cell.value!] ?? 0) + 1;
+          freq[cell.value] = (freq[cell.value] ?? 0) + 1;
         }
       }
     }

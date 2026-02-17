@@ -22,7 +22,7 @@ router.post("/register", async (req, res) => {
     password,
   });
 
-  req.session.user = user.email;
+  req.session.userId = user._id;
 
   res.json({ success: true, user });
 });
@@ -33,7 +33,7 @@ router.post("/login", async (req, res) => {
   const user = await User.findOne({ email, password });
   if (!user) return res.json({ success: false });
 
-  req.session.user = user.email;
+  req.session.userId = user._id;
   res.json({ success: true, user });
 });
 
@@ -66,13 +66,12 @@ router.post("/google", async (req, res) => {
 });
 
 router.post("/set-password", async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ success: false });
+  if (!req.session.userId) return res.status(401).json({ success: false });
 
   const { password } = req.body;
 
-  await User.findByIdAndUpdate(req.session.user.id, { password });
+  await User.findByIdAndUpdate(req.session.userId, { password });
 
   res.json({ success: true });
 });
-
 export default router;
