@@ -13,18 +13,18 @@ class SocketService {
 
     if (kIsWeb) {
       // Running on web
-      url = 'http://localhost:5000';
+      url = 'wss://bingogame-6eoj.onrender.com';
     } else if (Platform.isAndroid) {
       // Android emulator
-      url = 'http://10.0.2.2:5000';
+      url = 'wss://bingogame-6eoj.onrender.com';
     } else if (Platform.isIOS) {
       // iOS simulator
-      url = 'http://127.0.0.1:5000';
+      url = 'wss://bingogame-6eoj.onrender.com';
     } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       // Desktop
-      url = 'http://127.0.0.1:5000';
+      url = 'wss://bingogame-6eoj.onrender.com';
     } else {
-      url = 'http://127.0.0.1:5000'; // fallback
+      url = 'wss://bingogame-6eoj.onrender.com'; // fallback
     }
 
     socket = IO.io(
@@ -44,7 +44,7 @@ class SocketService {
     socket.onDisconnect((_) => print("❌ Socket disconnected in flutter"));
     socket.onReconnect((_) => print("🔄 Reconnected in flutter"));
     socket.onReconnectAttempt((_) => print("🔄 Reconnect attempt in flutter"));
-  } 
+  }
 
   void connect() {
     if (!socket.connected) {

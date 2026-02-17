@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const String BASE_URL = "http://localhost:5000/api";
+const String BASE_URL = "https://bingogame-6eoj.onrender.com/api";
 
 class Api {
   static Future<Map<String, dynamic>> login(Map<String, String> data) async {

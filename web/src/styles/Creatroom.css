@@ -1,0 +1,66 @@
+.create-room-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.create-room-card {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 350px;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.create-room-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.create-room-id {
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 25px;
+  color: #2a5298;
+}
+
+.create-room-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #2a5298;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-room-btn:hover {
+  background: #1e3c72;
+  transform: translateY(-2px);
+}
+
+.create-room-loading {
+  text-align: center;
+  margin-top: 100px;
+  font-size: 18px;
+  color: #555;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

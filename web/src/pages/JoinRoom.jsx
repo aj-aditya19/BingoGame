@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { socket } from "../services/socket";
-import { gameApi } from "../services/api"; // ✅ THIS WAS MISSING
+import { gameApi } from "../services/api";
+import "../styles/JoinRoom.css";
 
 const JoinRoom = ({ grid, user, onJoined }) => {
   const [roomId, setRoomId] = useState("");
 
   const joinRoom = async () => {
+    if (!roomId.trim()) {
+      alert("Please enter Room ID");
+      return;
+    }
+
     const res = await gameApi.joinRoom(roomId);
 
     if (!res.success) {
@@ -27,24 +33,21 @@ const JoinRoom = ({ grid, user, onJoined }) => {
   };
 
   return (
-    <div style={{ maxWidth: 360, margin: "40px auto", textAlign: "center" }}>
-      <h3>Join Room</h3>
+    <div className="joinroom-container">
+      <div className="joinroom-card">
+        <h3 className="joinroom-title">Join Room</h3>
 
-      <input
-        placeholder="Enter Room ID"
-        value={roomId}
-        onChange={(e) => setRoomId(e.target.value)}
-        style={{
-          width: "100%",
-          padding: 10,
-          fontSize: 16,
-          marginBottom: 10,
-        }}
-      />
+        <input
+          className="joinroom-input"
+          placeholder="Enter Room ID"
+          value={roomId}
+          onChange={(e) => setRoomId(e.target.value)}
+        />
 
-      <button onClick={joinRoom} style={{ width: "100%" }}>
-        Join Game
-      </button>
+        <button className="joinroom-btn" onClick={joinRoom}>
+          Join Game
+        </button>
+      </div>
     </div>
   );
 };

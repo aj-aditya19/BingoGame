@@ -1,0 +1,73 @@
+/* Grid.css */
+
+.grid-container {
+  max-width: 420px;
+  margin: 50px auto;
+  padding: 25px;
+  text-align: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.grid-title {
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: #1f2937;
+}
+
+.grid-board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.grid-input {
+  height: 55px;
+  font-size: 18px;
+  text-align: center;
+  border-radius: 10px;
+  border: 1px solid #cbd5f5;
+  transition: all 0.2s ease;
+}
+
+.grid-input:focus {
+  outline: none;
+  border: 2px solid #6366f1;
+  box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
+}
+
+.grid-input.duplicate {
+  border: 2px solid #ef4444;
+  background: #fee2e2;
+}
+
+.grid-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.random-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.random-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+.continue-btn {
+  background: #10b981;
+  color: white;
+}
+
+.continue-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}

@@ -1,0 +1,61 @@
+/* Game.css */
+
+.game-container {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  text-align: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.game-title {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.game-title.win {
+  color: #2ecc71;
+}
+
+.game-title.lose {
+  color: #e74c3c;
+}
+
+.game-title.turn {
+  color: #3498db;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 60px);
+  gap: 10px;
+  justify-content: center;
+}
+
+.game-cell {
+  height: 60px;
+  width: 60px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: 2px solid #333;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.game-cell:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: scale(1.05);
+}
+
+.game-cell.chosen {
+  background: #aaa;
+  color: white;
+  border: 2px solid #777;
+  cursor: not-allowed;
+}
+
+.game-cell:disabled {
+  cursor: not-allowed;
+}

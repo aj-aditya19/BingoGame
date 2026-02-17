@@ -1,0 +1,81 @@
+/* Register.css */
+
+.register-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #141e30, #243b55);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.register-card {
+  width: 400px;
+  padding: 40px;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.register-title {
+  margin-bottom: 25px;
+  font-size: 24px;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.register-input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  transition: 0.2s ease;
+}
+
+.register-input:focus {
+  outline: none;
+  border: 2px solid #4f46e5;
+  box-shadow: 0 0 5px rgba(79, 70, 229, 0.4);
+}
+
+.register-btn {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background: #10b981;
+  color: white;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.register-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.divider {
+  margin: 20px 0;
+  border-top: 1px solid #ddd;
+}
+
+.google-register-btn {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.google-register-btn:hover {
+  background: #f3f4f6;
+}

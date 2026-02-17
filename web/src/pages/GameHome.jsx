@@ -1,21 +1,21 @@
 import React from "react";
+import "../styles/GameHome.css";
 
 const GameHome = ({ onCreateRoom, onJoinRoom }) => {
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Bingo Game</h2>
+    <div className="gamehome-container">
+      <div className="gamehome-card">
+        <h2 className="gamehome-title">🎯 Bingo Game</h2>
 
-      <div style={{ marginTop: "20px" }}>
-        <button
-          onClick={onCreateRoom}
-          style={{ marginRight: "10px", padding: "10px 20px" }}
-        >
-          Create Room
-        </button>
+        <div className="gamehome-buttons">
+          <button onClick={onCreateRoom} className="gamehome-btn create-btn">
+            Create Room
+          </button>
 
-        <button onClick={onJoinRoom} style={{ padding: "10px 20px" }}>
-          Join Room
-        </button>
+          <button onClick={onJoinRoom} className="gamehome-btn join-btn">
+            Join Room
+          </button>
+        </div>
       </div>
     </div>
   );

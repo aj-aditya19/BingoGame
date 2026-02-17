@@ -1,0 +1,74 @@
+/* GameHome.css */
+
+.gamehome-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #141e30, #243b55);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.gamehome-card {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 50px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.gamehome-title {
+  font-size: 32px;
+  color: white;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.gamehome-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.gamehome-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.create-btn {
+  background: #2ecc71;
+  color: white;
+}
+
+.create-btn:hover {
+  background: #27ae60;
+  transform: translateY(-3px);
+}
+
+.join-btn {
+  background: #3498db;
+  color: white;
+}
+
+.join-btn:hover {
+  background: #2980b9;
+  transform: translateY(-3px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

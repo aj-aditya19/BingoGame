@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'services/firebase_service.dart';
+// import 'services/firebase_service.dart';
 import 'pages/firebase_options.dart';
 
 import 'models/cell_model.dart';
@@ -242,8 +242,8 @@ class _BingoAppState extends State<BingoApp> {
         );
         break;
 
-      default:
-        screen = const SizedBox();
+      // default:
+      //   screen = const SizedBox();
     }
 
     return MaterialApp(debugShowCheckedModeBanner: false, home: screen);

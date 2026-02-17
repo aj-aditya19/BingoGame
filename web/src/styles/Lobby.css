@@ -1,0 +1,95 @@
+/* Lobby.css */
+
+.lobby-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.lobby-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.lobby-room {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 16px;
+}
+
+.lobby-section {
+  margin-top: 25px;
+}
+
+.players-list div {
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.waiting-text {
+  text-align: center;
+  margin-top: 15px;
+  color: #666;
+}
+
+.preview-container {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.preview-card {
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.preview-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 32px);
+  gap: 5px;
+}
+
+.preview-cell {
+  height: 32px;
+  width: 32px;
+  font-size: 12px;
+  text-align: center;
+  line-height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+}
+
+.rules-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.start-btn {
+  width: 100%;
+  margin-top: 25px;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: #10b981;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.start-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}

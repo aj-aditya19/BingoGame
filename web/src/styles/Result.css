@@ -1,0 +1,78 @@
+/* Result.css */
+
+.result-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #141e30, #243b55);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.result-card {
+  width: 360px;
+  padding: 40px;
+  border-radius: 20px;
+  background: white;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.5s ease;
+}
+
+.result-title {
+  margin-bottom: 20px;
+}
+
+.winner-text {
+  color: #22c55e;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.draw-text {
+  color: #f97316;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.result-sub {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.play-again-btn {
+  margin-top: 25px;
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #4f46e5;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.play-again-btn:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+}
+
+.auto-text {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* simple animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
