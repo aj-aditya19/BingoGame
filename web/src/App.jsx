@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import SetPassword from "./pages/SetPassword";
 import GameHome from "./pages/GameHome";
 import Grid from "./pages/Grid";
 import CreateRoom from "./pages/CreateRoom";
@@ -70,16 +69,6 @@ const App = () => {
           onRegister={() => {
             console.log("Registering user");
             setPage("set-password");
-          }}
-        />
-      )}
-      {/* SET PASSWORD */}
-      {page === "set-password" && (
-        <SetPassword
-          onDone={() => {
-            console.log("Set password done");
-            console.log("User register as: ", user);
-            setPage("home");
           }}
         />
       )}

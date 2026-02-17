@@ -31,16 +31,6 @@ export const api = {
     return res.json();
   },
 
-  setPassword: async (password) => {
-    const res = await fetch(`${BASE_URL}/set-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ password }),
-    });
-    return res.json();
-  },
-
   // ===============================
   // 🎮 GAME / ROOM APIs
   // ===============================

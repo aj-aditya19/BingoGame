@@ -33,6 +33,9 @@ router.post("/login", async (req, res) => {
   const user = await User.findOne({ email, password });
   if (!user) return res.json({ success: false });
 
+  user.lastLogin = new Date();
+  await user.save();
+
   req.session.userId = user._id;
   res.json({ success: true, user });
 });
@@ -48,30 +51,20 @@ router.post("/google", async (req, res) => {
       user = await User.create({
         name: decoded.name,
         email: decoded.email,
-        password: null,
         provider: "google",
       });
     }
 
     req.session.userId = user._id;
-
+    user.lastLogin = new Date();
+    await user.save();
     res.json({
       success: true,
       user,
-      needPassword: user.password === null,
     });
   } catch (err) {
     res.status(401).json({ success: false });
   }
 });
 
-router.post("/set-password", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ success: false });
-
-  const { password } = req.body;
-
-  await User.findByIdAndUpdate(req.session.userId, { password });
-
-  res.json({ success: true });
-});
 export default router;

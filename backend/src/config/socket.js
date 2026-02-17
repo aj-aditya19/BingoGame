@@ -1,10 +1,11 @@
 import { rooms } from "../routes/game.route.js";
+import User from "../database/User.js";
 
 const initSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
-    socket.on("join-room", ({ roomId, user }) => {
+    socket.on("join-room", async ({ roomId, user }) => {
       const room = rooms.get(roomId);
       if (!room) return;
 
@@ -33,6 +34,11 @@ const initSocket = (io) => {
 
       socket.join(roomId);
       io.to(roomId).emit("room-joined", room.players);
+      try {
+        await User.findByIdAndUpdate(user.id, { lastLogin: new Date() });
+      } catch (err) {
+        console.log("Error updating lastLogin:", err);
+      }
     });
 
     /* ================= START GAME ================= */
@@ -77,7 +83,7 @@ const initSocket = (io) => {
       io.to(roomId).emit("game:turn", { userId: room.turnUserId });
     });
 
-    socket.on("game:win", ({ roomId, userId }) => {
+    socket.on("game:win", async ({ roomId, userId }) => {
       const room = rooms.get(roomId);
       if (!room || room.winnerUserId) return;
 
@@ -85,12 +91,31 @@ const initSocket = (io) => {
 
       io.to(roomId).emit("game:win", { userId });
 
-      // 🧹 CLEANUP after 3 seconds
+      const winner = room.players.find((p) => p.userId === userId);
+      const loser = room.players.find((p) => p.userId !== userId);
+
+      try {
+        if (winner) {
+          await User.findByIdAndUpdate(winner.userId, {
+            $inc: { win: 1, gamesPlayed: 1 },
+          });
+        }
+
+        if (loser) {
+          await User.findByIdAndUpdate(loser.userId, {
+            $inc: { loss: 1, gamesPlayed: 1 },
+          });
+        }
+      } catch (err) {
+        console.log("Error updating stats:", err);
+      }
+
       setTimeout(() => {
         rooms.delete(roomId);
         console.log("Room deleted:", roomId);
       }, 7000);
     });
+
     socket.on("leave-room", ({ roomId }) => {
       const room = rooms.get(roomId);
       if (!room) return;
@@ -112,18 +137,27 @@ const initSocket = (io) => {
     });
 
     /* ================= DISCONNECT ================= */
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       for (const [roomId, room] of rooms.entries()) {
         const leftPlayer = room.players.find((p) => p.socketId === socket.id);
 
         if (leftPlayer) {
-          socket.leave(roomId); // 👈 add this
+          socket.leave(roomId);
           room.players = room.players.filter((p) => p.socketId !== socket.id);
 
           if (room.started && room.players.length === 1) {
-            io.to(roomId).emit("game:win", {
-              userId: room.players[0].userId,
-            });
+            const winnerId = room.players[0].userId;
+
+            io.to(roomId).emit("game:win", { userId: winnerId });
+
+            try {
+              await User.findByIdAndUpdate(winnerId, {
+                $inc: { win: 1, gamesPlayed: 1 },
+              });
+            } catch (err) {
+              console.log("Error updating disconnect win:", err);
+            }
+
             rooms.delete(roomId);
           }
         }

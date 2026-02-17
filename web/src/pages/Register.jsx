@@ -118,11 +118,8 @@ export default function Register({ onRegister }) {
     const res = await api.googleAuth(token);
 
     if (res.success) {
-      if (res.needPassword) {
-        onRegister("set-password");
-      } else {
-        onRegister("input");
-      }
+      localStorage.setItem("user", JSON.stringify(res.user));
+      onRegister();
     }
   };
 
