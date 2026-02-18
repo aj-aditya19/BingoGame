@@ -9,7 +9,6 @@ const initSocket = (io) => {
       const room = rooms.get(roomId);
       if (!room) return;
 
-      // ❌ duplicate join prevent
       const existing = room.players.find((p) => p.userId === user._id);
       if (existing) {
         existing.socketId = socket.id;
@@ -48,7 +47,6 @@ const initSocket = (io) => {
 
       room.started = true;
       room.winnerUserId = null;
-      // ✅ Player 1 always starts
       const firstPlayer =
         room.players.find((p) => p.role === "Host") || room.players[0];
       room.turnUserId = firstPlayer.userId;

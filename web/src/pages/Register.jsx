@@ -26,8 +26,8 @@ export default function Register({ onRegister }) {
     try {
       const res = await api.register(form);
       if (res.success) {
-        // ✅ check if onRegister exists
-        if (onRegister) onRegister();
+        localStorage.setItem("user", JSON.stringify(res.user));
+        if (onRegister) onRegister(res.user);
       } else {
         alert(res.message || "Registration failed");
       }

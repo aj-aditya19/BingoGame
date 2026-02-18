@@ -9,6 +9,7 @@ import Lobby from "./pages/Lobby";
 import Game from "./pages/Game";
 import Result from "./pages/Result";
 import { socket } from "./services/socket";
+import { set } from "mongoose";
 
 const App = () => {
   const [page, setPage] = useState("login");
@@ -66,8 +67,9 @@ const App = () => {
       {/* REGISTER */}
       {page === "register" && (
         <Register
-          onRegister={() => {
+          onRegister={(userData) => {
             console.log("Registering user");
+            setUser(userData);
             setPage("home");
           }}
         />
