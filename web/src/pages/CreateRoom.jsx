@@ -16,7 +16,7 @@ const CreateRoom = ({ grid, user, onCreated }) => {
       socket.emit("join-room", {
         roomId: res.roomId,
         user: {
-          id: user._id,
+          _id: user._id,
           name: user.name,
           grid,
           role: "Host",

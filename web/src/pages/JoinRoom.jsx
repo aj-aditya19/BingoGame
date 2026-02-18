@@ -22,7 +22,7 @@ const JoinRoom = ({ grid, user, onJoined }) => {
     socket.emit("join-room", {
       roomId,
       user: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         grid,
         role: "Invited",

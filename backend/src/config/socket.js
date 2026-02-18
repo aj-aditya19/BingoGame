@@ -10,7 +10,7 @@ const initSocket = (io) => {
       if (!room) return;
 
       // ❌ duplicate join prevent
-      const existing = room.players.find((p) => p.userId === user.id);
+      const existing = room.players.find((p) => p.userId === user._id);
       if (existing) {
         existing.socketId = socket.id;
         existing.name = user.name ?? existing.name;
@@ -18,12 +18,12 @@ const initSocket = (io) => {
         existing.role = user.role ?? existing.role;
       } else {
         if (room.players.length >= 2) {
-          console.log("Room full, cannot join", user.id);
+          console.log("Room full, cannot join", user._id);
           return;
         }
 
         room.players.push({
-          userId: user.id,
+          userId: user._id,
           name: user.name ?? "Unknown",
           socketId: socket.id,
           grid: user.grid ?? [],
@@ -35,7 +35,7 @@ const initSocket = (io) => {
       socket.join(roomId);
       io.to(roomId).emit("room-joined", room.players);
       try {
-        await User.findByIdAndUpdate(user.id, { lastLogin: new Date() });
+        await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
       } catch (err) {
         console.log("Error updating lastLogin:", err);
       }
