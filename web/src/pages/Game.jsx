@@ -32,18 +32,20 @@ const Game = ({
       setGrid((prev) => {
         const updated = prev.map((row) =>
           row.map((cell) =>
-            cell.value === number ? { ...cell, chosen: true } : cell,
+            cell.value === number ? { ...cell, chosen: true } : { ...cell },
           ),
         );
 
-        if (!winner && currentTurn === myUserId && checkWin(updated)) {
+        const { newGrid, win } = checkWin(updated);
+
+        if (!winner && currentTurn === myUserId && win) {
           socket.emit("game:win", {
             roomId,
             userId: myUserId,
           });
         }
 
-        return updated;
+        return newGrid;
       });
     };
 
@@ -82,27 +84,53 @@ const Game = ({
     });
   };
 
+  // ✅ UPDATED WIN CHECK WITH LINE HIGHLIGHT
   const checkWin = (grid) => {
-    let count = 0;
+    let lines = 0;
 
+    // Deep copy grid
+    const updated = grid.map((row) =>
+      row.map((cell) => ({ ...cell, completed: false })),
+    );
+
+    // Rows
     for (let r = 0; r < 5; r++) {
-      if (grid[r].every((c) => c.chosen)) count++;
+      if (updated[r].every((c) => c.chosen)) {
+        lines++;
+        updated[r].forEach((c) => (c.completed = true));
+      }
     }
 
+    // Columns
     for (let c = 0; c < 5; c++) {
-      if (grid.every((row) => row[c].chosen)) count++;
+      if (updated.every((row) => row[c].chosen)) {
+        lines++;
+        updated.forEach((row) => (row[c].completed = true));
+      }
     }
 
-    if (grid.every((row, i) => row[i].chosen)) count++;
-    if (grid.every((row, i) => row[4 - i].chosen)) count++;
+    // Diagonal 1
+    if (updated.every((row, i) => row[i].chosen)) {
+      lines++;
+      updated.forEach((row, i) => (row[i].completed = true));
+    }
 
-    return count >= 5;
+    // Diagonal 2
+    if (updated.every((row, i) => row[4 - i].chosen)) {
+      lines++;
+      updated.forEach((row, i) => (row[4 - i].completed = true));
+    }
+
+    return {
+      newGrid: updated,
+      win: lines >= 5,
+    };
   };
 
   const getTitle = () => {
     if (winner) {
       return winner === myUserId
-        ? { text: "🎉 You Win!", class: "win" }
+        ? { text: "🎉 You Win", class: "win" }
         : { text: "😢 You Lost", class: "lose" };
     }
 
@@ -123,7 +151,10 @@ const Game = ({
             key={i}
             onClick={() => selectNumber(cell)}
             disabled={cell.chosen || isLocked}
-            className={`game-cell ${cell.chosen ? "chosen" : ""}`}
+            className={`game-cell 
+              ${cell.chosen ? "chosen" : ""} 
+              ${cell.completed ? "completed" : ""}
+            `}
           >
             {cell.value}
           </button>

@@ -59,3 +59,10 @@
 .game-cell:disabled {
   cursor: not-allowed;
 }
+
+.game-cell.completed {
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  border: 2px solid darkred;
+}
