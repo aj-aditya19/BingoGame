@@ -81,9 +81,9 @@ const App = () => {
             setPage("grid");
           }}
           onJoinRoom={() => {
-            user.role = "Invited";
             console.log("Joining room by the user: ", user.email);
             setMode("join");
+            setUser((prev) => ({ ...prev, role: "Invited" }));
             setPage("grid");
           }}
         />
@@ -104,7 +104,7 @@ const App = () => {
           grid={gameGrid}
           user={user}
           onCreated={(id) => {
-            user.role = "Host";
+            setUser((prev) => ({ ...prev, role: "Host" }));
             setRoomId(id);
             setPage("lobby");
           }}
@@ -116,7 +116,7 @@ const App = () => {
           grid={gameGrid}
           user={user}
           onJoined={(id) => {
-            user.role = "Invited";
+            setUser((prev) => ({ ...prev, role: "Invited" }));
             setRoomId(id);
             setPage("lobby");
           }}

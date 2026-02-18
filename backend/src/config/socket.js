@@ -138,13 +138,32 @@ const initSocket = (io) => {
 
     /* ================= DISCONNECT ================= */
     socket.on("disconnect", async () => {
+      console.log("Socket disconnected:", socket.id);
+
       for (const [roomId, room] of rooms.entries()) {
-        const leftPlayer = room.players.find((p) => p.socketId === socket.id);
+        const player = room.players.find((p) => p.socketId === socket.id);
 
-        if (leftPlayer) {
-          socket.leave(roomId);
-          room.players = room.players.filter((p) => p.socketId !== socket.id);
+        if (!player) continue;
 
+        console.log("Temporary disconnect for user:", player.userId);
+
+        setTimeout(async () => {
+          const stillExists = room.players.find(
+            (p) => p.userId === player.userId,
+          );
+
+          // If user reconnected (socketId changed), do nothing
+          if (stillExists && stillExists.socketId !== socket.id) {
+            console.log("User reconnected, not removing");
+            return;
+          }
+
+          // Remove permanently
+          room.players = room.players.filter((p) => p.userId !== player.userId);
+
+          io.to(roomId).emit("room-joined", room.players);
+
+          // 🎯 If game started & only 1 left → give win
           if (room.started && room.players.length === 1) {
             const winnerId = room.players[0].userId;
 
@@ -154,13 +173,26 @@ const initSocket = (io) => {
               await User.findByIdAndUpdate(winnerId, {
                 $inc: { win: 1, gamesPlayed: 1 },
               });
+
+              await User.findByIdAndUpdate(player.userId, {
+                $inc: { loss: 1, gamesPlayed: 1 },
+              });
+
+              console.log("Win/Loss updated due to disconnect");
             } catch (err) {
-              console.log("Error updating disconnect win:", err);
+              console.log("Error updating disconnect stats:", err);
             }
 
             rooms.delete(roomId);
+            console.log("Room deleted after disconnect win:", roomId);
           }
-        }
+
+          // If empty
+          if (room.players.length === 0) {
+            rooms.delete(roomId);
+            console.log("Room deleted (empty):", roomId);
+          }
+        }, 5000);
       }
     });
   });
