@@ -3,64 +3,60 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 32px 16px;
+  background:
+    radial-gradient(circle at top, rgba(251, 191, 36, 0.1), transparent 30%),
+    linear-gradient(135deg, #07111f, #0b1220 55%, #050816);
 }
 
 .create-room-card {
-  background: #ffffff;
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  width: min(100%, 460px);
+  background: var(--panel);
+  padding: 40px 32px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-lg);
   text-align: center;
-  width: 350px;
-  animation: fadeIn 0.4s ease-in-out;
+  color: var(--text);
+  animation: cardRise 0.55s ease-out;
 }
 
 .create-room-title {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: #333;
+  font-size: 1rem;
+  margin: 0 0 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
 }
 
 .create-room-id {
-  font-size: 28px;
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: bold;
-  letter-spacing: 2px;
-  margin-bottom: 25px;
-  color: #2a5298;
+  letter-spacing: 4px;
+  margin: 0 0 24px;
+  color: white;
 }
 
 .create-room-btn {
-  padding: 12px 24px;
+  padding: 14px 24px;
   border: none;
-  border-radius: 8px;
-  background: #2a5298;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
   color: white;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  box-shadow: 0 14px 28px rgba(249, 115, 22, 0.24);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .create-room-btn:hover {
-  background: #1e3c72;
   transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(249, 115, 22, 0.34);
 }
 
 .create-room-loading {
-  text-align: center;
-  margin-top: 100px;
   font-size: 18px;
-  color: #555;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  color: var(--muted);
 }

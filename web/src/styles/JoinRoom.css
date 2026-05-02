@@ -1,72 +1,69 @@
 /* JoinRoom.css */
 
 .joinroom-container {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #1e293b, #0f172a);
+  padding: 32px 16px;
+  background:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.1), transparent 30%),
+    linear-gradient(135deg, #07111f, #0b1220 55%, #050816);
 }
 
 .joinroom-card {
-  width: 380px;
-  padding: 40px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
+  width: min(100%, 420px);
+  padding: 40px 32px;
+  border-radius: var(--radius-xl);
+  background: var(--panel);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--line);
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  animation: fadeIn 0.4s ease-in-out;
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  animation: cardRise 0.55s ease-out;
 }
 
 .joinroom-title {
-  font-size: 24px;
-  margin-bottom: 25px;
-  color: white;
+  font-size: 2rem;
+  margin: 0 0 22px;
 }
 
 .joinroom-input {
   width: 100%;
-  padding: 12px;
+  padding: 14px 16px;
   font-size: 16px;
-  border-radius: 10px;
-  border: none;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
   outline: none;
   margin-bottom: 15px;
   text-align: center;
-  transition: 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .joinroom-input:focus {
-  box-shadow: 0 0 6px rgba(99, 102, 241, 0.8);
+  border-color: rgba(56, 189, 248, 0.8);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.14);
+  transform: translateY(-1px);
 }
 
 .joinroom-btn {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   font-size: 16px;
-  border-radius: 10px;
+  border-radius: 14px;
   border: none;
   cursor: pointer;
   font-weight: 600;
-  background: #6366f1;
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
   color: white;
-  transition: all 0.3s ease;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .joinroom-btn:hover {
-  background: #4f46e5;
   transform: translateY(-2px);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  box-shadow: 0 18px 32px rgba(37, 99, 235, 0.34);
 }

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'pages/firebase_options.dart';
 
 import 'models/cell_model.dart';
+import 'pages/landing_screen.dart';
 import 'pages/login_screen.dart';
 import 'pages/register_screen.dart';
 import 'pages/grid_screen.dart';
@@ -24,6 +25,7 @@ void main() async {
 
 // ✅ Enum for screens
 enum AppScreen {
+  landing,
   login,
   register,
   grid,
@@ -47,7 +49,7 @@ class BingoApp extends StatefulWidget {
 }
 
 class _BingoAppState extends State<BingoApp> {
-  AppScreen currentScreen = AppScreen.login;
+  AppScreen currentScreen = AppScreen.landing;
 
   Map<String, dynamic>? user;
 
@@ -113,6 +115,13 @@ class _BingoAppState extends State<BingoApp> {
     Widget screen;
 
     switch (currentScreen) {
+      case AppScreen.landing:
+        screen = LandingScreen(
+          onLogin: () => go(AppScreen.login),
+          onRegister: () => go(AppScreen.register),
+        );
+        break;
+
       case AppScreen.login:
         screen = LoginScreen(
           onLogin: (u) {

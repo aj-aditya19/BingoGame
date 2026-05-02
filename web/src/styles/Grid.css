@@ -1,51 +1,69 @@
 /* Grid.css */
 
 .grid-container {
-  max-width: 420px;
-  margin: 50px auto;
-  padding: 25px;
+  min-height: 100vh;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 18px;
   text-align: center;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .grid-title {
-  font-size: 22px;
-  margin-bottom: 20px;
-  color: #1f2937;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin: 0 0 18px;
+  color: var(--text);
+}
+
+.grid-container::before {
+  content: "";
+  display: block;
+  margin: 0 auto 24px;
+  width: 96px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 8px 22px rgba(251, 191, 36, 0.2);
 }
 
 .grid-board {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-lg);
 }
 
 .grid-input {
-  height: 55px;
+  height: 60px;
   font-size: 18px;
   text-align: center;
-  border-radius: 10px;
-  border: 1px solid #cbd5f5;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   transition: all 0.2s ease;
 }
 
 .grid-input:focus {
   outline: none;
-  border: 2px solid #6366f1;
-  box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
+  border-color: rgba(251, 191, 36, 0.8);
+  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.14);
 }
 
 .grid-input.duplicate {
-  border: 2px solid #ef4444;
-  background: #fee2e2;
+  border: 2px solid rgba(239, 68, 68, 0.9);
+  background: rgba(239, 68, 68, 0.12);
 }
 
 .grid-btn {
   width: 100%;
-  margin-top: 12px;
-  padding: 12px;
+  margin-top: 14px;
+  padding: 14px;
   font-size: 16px;
-  border-radius: 10px;
+  border-radius: 16px;
   border: none;
   cursor: pointer;
   font-weight: 600;
@@ -53,21 +71,34 @@
 }
 
 .random-btn {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
   color: white;
 }
 
 .random-btn:hover {
-  background: #2563eb;
   transform: translateY(-2px);
 }
 
 .continue-btn {
-  background: #10b981;
-  color: white;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  color: #111827;
+  box-shadow: 0 14px 28px rgba(249, 115, 22, 0.2);
 }
 
 .continue-btn:hover {
-  background: #059669;
   transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(249, 115, 22, 0.28);
+}
+
+@media (max-width: 560px) {
+  .grid-board {
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .grid-input {
+    height: 52px;
+    font-size: 16px;
+    border-radius: 14px;
+  }
 }

@@ -27,7 +27,7 @@ const Result = ({ winner, isDraw, onPlayAgain }) => {
         {!isDraw ? (
           <>
             <div className="winner-text">🏆 Winner</div>
-            <p style={{ fontSize: 20, fontWeight: "bold" }}>{winner}</p>
+            <p className="result-winner-name">{winner}</p>
             <p className="result-sub">BINGO completed 🎉</p>
           </>
         ) : (

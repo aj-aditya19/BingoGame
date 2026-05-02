@@ -1,26 +1,32 @@
 /* Register.css */
 
 .register-container {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #141e30, #243b55);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 32px 16px;
+  background:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.1), transparent 30%),
+    linear-gradient(135deg, #07111f, #0b1220 55%, #050816);
 }
 
 .register-card {
-  width: 400px;
-  padding: 40px;
-  border-radius: 20px;
-  background: white;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  width: min(100%, 440px);
+  padding: 36px;
+  border-radius: var(--radius-xl);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-lg);
   text-align: center;
+  color: var(--text);
+  animation: cardRise 0.55s ease-out;
 }
 
 .register-title {
-  margin-bottom: 25px;
-  font-size: 24px;
+  margin: 0 0 10px;
+  font-size: 2rem;
 }
 
 .register-form {
@@ -30,52 +36,71 @@
 }
 
 .register-input {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   font-size: 15px;
-  transition: 0.2s ease;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .register-input:focus {
   outline: none;
-  border: 2px solid #4f46e5;
-  box-shadow: 0 0 5px rgba(79, 70, 229, 0.4);
+  border-color: rgba(56, 189, 248, 0.8);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.14);
+  transform: translateY(-1px);
 }
 
 .register-btn {
   margin-top: 8px;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px;
+  border-radius: 14px;
   border: none;
   font-size: 16px;
   cursor: pointer;
-  background: #10b981;
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
   color: white;
   font-weight: 600;
-  transition: 0.2s ease;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .register-btn:hover {
-  background: #059669;
   transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(37, 99, 235, 0.34);
 }
 
 .divider {
   margin: 20px 0;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .google-register-btn {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background: white;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
   cursor: pointer;
   font-weight: 600;
-  transition: 0.2s ease;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .google-register-btn:hover {
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-2px);
+}
+
+@keyframes cardRise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

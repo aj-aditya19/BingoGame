@@ -1,0 +1,264 @@
+
+:root {
+	color-scheme: dark;
+	--bg-0: #050816;
+	--bg-1: #0b1220;
+	--panel: rgba(11, 18, 32, 0.74);
+	--line: rgba(255, 255, 255, 0.12);
+	--text: #f8fafc;
+	--muted: rgba(226, 232, 240, 0.72);
+	--accent: #fbbf24;
+	--accent-2: #38bdf8;
+	--success: #22c55e;
+	--danger: #ef4444;
+	--shadow-lg: 0 22px 70px rgba(0, 0, 0, 0.42);
+	--shadow-md: 0 12px 30px rgba(0, 0, 0, 0.22);
+	--radius-xl: 28px;
+	--radius-lg: 22px;
+	--radius-md: 16px;
+	--radius-sm: 12px;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	margin: 0;
+	min-width: 320px;
+	min-height: 100vh;
+	background:
+		radial-gradient(circle at top left, rgba(251, 191, 36, 0.08), transparent 28%),
+		radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.1), transparent 32%),
+		linear-gradient(135deg, var(--bg-1), var(--bg-0) 65%, #02050d);
+	color: var(--text);
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#root {
+	min-height: 100vh;
+}
+
+button,
+input,
+textarea {
+	font: inherit;
+}
+
+button {
+	border: 0;
+}
+
+input {
+	color: var(--text);
+}
+
+input::placeholder {
+	color: rgba(226, 232, 240, 0.48);
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		color-scheme: light;
+		--bg-0: #f8fafc;
+		--bg-1: #eef2ff;
+		--panel: rgba(255, 255, 255, 0.86);
+		--line: rgba(15, 23, 42, 0.1);
+		--text: #0f172a;
+		--muted: rgba(15, 23, 42, 0.68);
+		--shadow-lg: 0 22px 60px rgba(15, 23, 42, 0.12);
+		--shadow-md: 0 12px 24px rgba(15, 23, 42, 0.08);
+	}
+
+	body {
+		background:
+			radial-gradient(circle at top left, rgba(251, 191, 36, 0.18), transparent 28%),
+			radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.14), transparent 32%),
+			linear-gradient(135deg, var(--bg-0), var(--bg-1) 65%, #ffffff);
+	}
+
+	.landing-container,
+	.login-container,
+	.register-container,
+	.gamehome-container,
+	.grid-container,
+	.create-room-container,
+	.joinroom-container,
+	.lobby-container,
+	.game-container,
+	.result-container,
+	.setpass-container {
+		background:
+			radial-gradient(circle at top left, rgba(251, 191, 36, 0.16), transparent 30%),
+			radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 32%),
+			linear-gradient(135deg, #f8fafc 0%, #eef2ff 55%, #e2e8f0 100%) !important;
+		color: var(--text) !important;
+	}
+
+	.landing-copy,
+	.landing-art-header,
+	.landing-art-kicker,
+	.landing-art-title,
+	.landing-feature-card,
+	.landing-feature-card p,
+	.landing-stat-card,
+	.landing-stat-label,
+	.landing-stat-value,
+	.landing-ribbon,
+	.landing-live-pill,
+	.landing-float-card,
+	.landing-float-label,
+	.login-card,
+	.register-card,
+	.gamehome-card,
+	.grid-title,
+	.create-room-card,
+	.create-room-title,
+	.create-room-id,
+	.joinroom-card,
+	.joinroom-title,
+	.lobby-container,
+	.lobby-section,
+	.lobby-section h4,
+	.lobby-room,
+	.players-list div,
+	.preview-card,
+	.preview-title,
+	.preview-cell,
+	.rules-list,
+	.game-title,
+	.game-cell,
+	.result-card,
+	.result-title,
+	.winner-text,
+	.draw-text,
+	.result-sub,
+	.auto-text,
+	.setpass-card,
+	.setpass-title,
+	.setpass-sub {
+		color: var(--text) !important;
+	}
+
+	.landing-ribbon,
+	.landing-art-card,
+	.landing-feature-card,
+	.landing-stat-card,
+	.landing-float-card,
+	.login-card,
+	.register-card,
+	.gamehome-card,
+	.grid-board,
+	.create-room-card,
+	.joinroom-card,
+	.lobby-section,
+	.preview-card,
+	.game-grid,
+	.result-card,
+	.setpass-card {
+		background: var(--panel) !important;
+		border-color: var(--line) !important;
+		box-shadow: var(--shadow-lg) !important;
+	}
+
+	.landing-grid {
+		opacity: 0.4;
+	}
+
+	.landing-badge,
+	.landing-art-kicker,
+	.landing-stat-label,
+	.lobby-room,
+	.lobby-section h4,
+	.rules-list,
+	.auto-text,
+	.setpass-sub,
+	.register-text {
+		color: var(--muted) !important;
+	}
+
+	.login-input,
+	.register-input,
+	.joinroom-input,
+	.setpass-input,
+	.grid-input {
+		background: rgba(15, 23, 42, 0.04) !important;
+		color: var(--text) !important;
+		border-color: rgba(15, 23, 42, 0.14) !important;
+	}
+
+	.google-btn,
+	.google-register-btn,
+	.landing-btn-secondary {
+		background: rgba(15, 23, 42, 0.05) !important;
+		color: var(--text) !important;
+		border-color: rgba(15, 23, 42, 0.14) !important;
+	}
+
+	.grid-input.duplicate {
+		background: rgba(239, 68, 68, 0.08) !important;
+	}
+
+	.game-cell,
+	.preview-cell,
+	.players-list div {
+		background: rgba(15, 23, 42, 0.04) !important;
+	}
+
+	.landing-btn-primary,
+	.login-btn,
+	.register-btn,
+	.gamehome-btn.create-btn,
+	.random-btn,
+	.start-btn,
+	.create-room-btn,
+	.joinroom-btn,
+	.play-again-btn,
+	.setpass-btn,
+	.continue-btn {
+		color: #0f172a !important;
+	}
+
+	.landing-art-card::after {
+		background: rgba(251, 191, 36, 0.18) !important;
+	}
+
+	.landing-live-pill {
+		background: rgba(255, 255, 255, 0.68) !important;
+	}
+
+	.landing-live-pill,
+	.landing-float-card {
+		border-color: rgba(15, 23, 42, 0.08) !important;
+	}
+
+	.landing-feature-card:hover,
+	.landing-btn-secondary:hover,
+	.google-btn:hover,
+	.google-register-btn:hover {
+		background: rgba(255, 255, 255, 0.95) !important;
+	}
+
+	.landing-container,
+	.login-container,
+	.register-container,
+	.gamehome-container,
+	.grid-container,
+	.create-room-container,
+	.joinroom-container,
+	.lobby-container,
+	.game-container,
+	.result-container,
+	.setpass-container {
+		background-attachment: fixed !important;
+	}
+}

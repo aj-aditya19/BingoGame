@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import GameHome from "./pages/GameHome";
@@ -9,9 +10,10 @@ import Lobby from "./pages/Lobby";
 import Game from "./pages/Game";
 import Result from "./pages/Result";
 import { socket } from "./services/socket";
+import "./App.css";
 
 const App = () => {
-  const [page, setPage] = useState("login");
+  const [page, setPage] = useState("landing");
   const [mode, setMode] = useState(null);
   const [roomId, setRoomId] = useState(null);
   const [gameGrid, setGameGrid] = useState(null);
@@ -24,13 +26,6 @@ const App = () => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
   });
-
-  useEffect(() => {
-    if (!user) {
-      console.log("No user login go and login first.");
-      setPage("login");
-    }
-  }, [user]);
 
   useEffect(() => {
     socket.on("room-joined", (updatedPlayers) => {
@@ -50,7 +45,14 @@ const App = () => {
   }, []);
 
   return (
-    <div>
+    <div className="app-shell">
+      {/* LANDING */}
+      {page === "landing" && (
+        <Landing
+          onLogin={() => setPage("login")}
+          onRegister={() => setPage("register")}
+        />
+      )}
       {/* LOGIN */}{" "}
       {page === "login" && (
         <Login
