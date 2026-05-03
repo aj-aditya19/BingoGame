@@ -22,9 +22,7 @@ dependencies:
   fluttertoast: ^8.2.1
 
   # Firebase
-  firebase_core: ^4.3.0
-  firebase_auth: ^6.1.3
-  google_sign_in: ^6.1.0
+  # (removed firebase for this app - using backend MongoDB)
 
   # Real-time
   socket_io_client: ^3.1.4
