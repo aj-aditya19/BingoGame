@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class LandingPage extends StatelessWidget {
-  const LandingPage({super.key, required this.onLogin});
+  const LandingPage({super.key, required this.onLogin, required this.onCreate});
 
   final VoidCallback onLogin;
+  final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,7 @@ class LandingPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         OutlinedButton(
-                          onPressed: onLogin,
+                          onPressed: onCreate,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.white,
                             side: BorderSide(

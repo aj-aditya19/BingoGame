@@ -29,7 +29,25 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://bingogame-web-t73z.vercel.app"],
+    origin: function (origin, callback) {
+      // allow requests with no origin (mobile apps, Postman)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "https://bingogame-web-t73z.vercel.app",
+      ];
+
+      // allow any localhost (for Flutter web random ports)
+      if (
+        origin.startsWith("http://localhost") ||
+        allowedOrigins.includes(origin)
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
@@ -58,7 +76,12 @@ app.use("/api/game", gameRoutes);
 // socket init
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://bingogame-web-t73z.vercel.app"],
+    origin: (origin, callback) => {
+      if (!origin || origin.startsWith("http://localhost")) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     methods: ["GET", "POST"],
     credentials: true,
   },
