@@ -1,43 +1,87 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 import User from "../database/User.js";
 import admin from "../config/firebase.js";
 
 const router = express.Router();
 
-router.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!email || !password || !name) {
-    return res.json({ success: false, message: "All fields required" });
-  }
-
-  const exist = await User.findOne({ email });
-  if (exist) {
-    return res.json({ success: false, message: "User already exists" });
-  }
-
-  const user = await User.create({
-    name,
-    email,
-    password,
+// Helper function to generate JWT token
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET || "your_jwt_secret", {
+    expiresIn: "30d",
   });
+};
 
-  req.session.userId = user._id;
+// Helper function to send user response with token
+const sendUserResponse = async (user, res, withToken = false) => {
+  const response = { success: true, user: user.toObject() };
 
-  res.json({ success: true, user });
+  if (withToken) {
+    response.token = generateToken(user._id);
+  }
+
+  return res.json(response);
+};
+
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!email || !password || !name) {
+      return res.json({ success: false, message: "All fields required" });
+    }
+
+    const exist = await User.findOne({ email });
+    if (exist) {
+      return res.json({ success: false, message: "User already exists" });
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+    });
+
+    // Session for web
+    if (req.session) {
+      req.session.userId = user._id;
+    }
+
+    // Check if client requested token (mobile apps)
+    const withToken =
+      req.headers["x-client-type"] === "mobile" || req.body.returnToken;
+    return sendUserResponse(user, res, withToken);
+  } catch (err) {
+    console.error("Register error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email, password });
-  if (!user) return res.json({ success: false });
+    const user = await User.findOne({ email, password });
+    if (!user) {
+      return res.json({ success: false, message: "Invalid credentials" });
+    }
 
-  user.lastLogin = new Date();
-  await user.save();
+    user.lastLogin = new Date();
+    await user.save();
 
-  req.session.userId = user._id;
-  res.json({ success: true, user });
+    // Session for web
+    if (req.session) {
+      req.session.userId = user._id;
+    }
+
+    // Check if client requested token (mobile apps)
+    const withToken =
+      req.headers["x-client-type"] === "mobile" || req.body.returnToken;
+    return sendUserResponse(user, res, withToken);
+  } catch (err) {
+    console.error("Login error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
 });
 
 router.post("/google", async (req, res) => {
@@ -55,15 +99,37 @@ router.post("/google", async (req, res) => {
       });
     }
 
-    req.session.userId = user._id;
     user.lastLogin = new Date();
     await user.save();
-    res.json({
-      success: true,
-      user,
-    });
+
+    // Session for web
+    if (req.session) {
+      req.session.userId = user._id;
+    }
+
+    // Always return token for Google auth (typically mobile)
+    return sendUserResponse(user, res, true);
   } catch (err) {
-    res.status(401).json({ success: false });
+    console.error("Google auth error:", err);
+    res.status(401).json({ success: false, message: "Authentication failed" });
+  }
+});
+
+// Verify token endpoint (for mobile apps)
+router.get("/verify-token", (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.json({ success: false, message: "No token provided" });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your_jwt_secret",
+    );
+    res.json({ success: true, userId: decoded.userId });
+  } catch (err) {
+    res.json({ success: false, message: "Invalid token" });
   }
 });
 
