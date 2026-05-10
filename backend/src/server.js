@@ -25,30 +25,45 @@ const corsOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(",")
   : ["http://localhost:5173", "http://localhost:3000"];
 
+const defaultHostedOrigins = ["https://bingogame-web-t73z.vercel.app"];
+
+const allowedOrigins = new Set(
+  [...corsOrigins, ...defaultHostedOrigins]
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+
+  if (
+    origin.startsWith("http://localhost") ||
+    origin.startsWith("http://127.0.0.1")
+  ) {
+    return true;
+  }
+
+  if (allowedOrigins.has(origin)) {
+    return true;
+  }
+
+  if (NODE_ENV === "production") {
+    return false;
+  }
+
+  return true;
+};
+
 // CORS Configuration - supports web, Flutter mobile, and Flutter web
 app.use(
   cors({
     origin: function (origin, callback) {
       // Allow requests with no origin (mobile apps, Postman)
-      if (!origin) return callback(null, true);
-
-      const allowedOrigins = corsOrigins;
-
-      // allow any localhost (for Flutter web random ports, Postman, etc.)
-      if (
-        origin.startsWith("http://localhost") ||
-        origin.startsWith("http://127.0.0.1") ||
-        allowedOrigins.includes(origin)
-      ) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 
-      // production - strict checking
-      if (NODE_ENV === "production" && !allowedOrigins.includes(origin)) {
-        return callback(new Error("Not allowed by CORS"));
-      }
-
-      return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   }),
@@ -92,23 +107,11 @@ app.get("/health", (req, res) => {
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
-      // Allow no origin (mobile apps, desktop clients)
-      if (!origin) return callback(null, true);
-
-      // Allow localhost
-      if (
-        origin.startsWith("http://localhost") ||
-        origin.startsWith("http://127.0.0.1")
-      ) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 
-      // Allow configured origins
-      if (corsOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(null, true); // permissive in dev
+      return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST"],
     credentials: true,
