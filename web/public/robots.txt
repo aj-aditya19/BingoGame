@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bingogame-web-t73z.vercel.app/sitemap.xml
