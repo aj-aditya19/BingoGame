@@ -110,13 +110,13 @@ const Landing = ({ onLogin, onRegister }) => {
                 width="340"
                 height="56"
                 rx="18"
-                fill="#111827"
-                opacity="0.9"
+                fill="#dbeafe"
+                opacity="1"
               />
               <text
                 x="63"
                 y="76"
-                fill="#ffffff"
+                fill="#1e3a8a"
                 fontSize="28"
                 fontWeight="700"
                 letterSpacing="3"
@@ -141,7 +141,7 @@ const Landing = ({ onLogin, onRegister }) => {
                         height="42"
                         rx="12"
                         fill={active ? "#fde68a" : "#ffffff"}
-                        stroke={active ? "#f59e0b" : "#cbd5e1"}
+                        stroke={active ? "#f59e0b" : "#bfdbfe"}
                         strokeWidth="2"
                       />
                       {active && (

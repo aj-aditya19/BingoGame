@@ -43,7 +43,6 @@ const JoinRoom = ({ grid, user, onJoined }) => {
           value={roomId}
           onChange={(e) => setRoomId(e.target.value)}
         />
-
         <button className="joinroom-btn" onClick={joinRoom}>
           Join Game
         </button>
