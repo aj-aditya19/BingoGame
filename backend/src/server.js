@@ -1,13 +1,10 @@
 import "dotenv/config";
-
 import express from "express";
 import MongoStore from "connect-mongo";
 import session from "express-session";
 import cors from "cors";
-
 import http from "http";
 import { Server } from "socket.io";
-
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.route.js";
 import gameRoutes from "./routes/game.route.js";
@@ -20,7 +17,6 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-// Parse CORS origins from env
 const corsOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(",")
   : ["http://localhost:5173", "http://localhost:3000"];
@@ -54,16 +50,15 @@ const isAllowedOrigin = (origin) => {
   return true;
 };
 
-// CORS Configuration - supports web, Flutter mobile, and Flutter web
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, Postman)
-      if (isAllowedOrigin(origin)) {
+      if (!origin) {
         return callback(null, true);
       }
-
-      return callback(new Error("Not allowed by CORS"));
+      if (origin.startsWith("http://localhost")) return callback(null, true);
+      if (allowedOrigins.has(origin)) return callback(null, true);
+      return callback(null, true);
     },
     credentials: true,
   }),
@@ -81,16 +76,14 @@ app.use(
       httpOnly: true,
       secure: NODE_ENV === "production",
       sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+      maxAge: 1000 * 60 * 60 * 24 * 30,
     },
   }),
 );
 
-// API routes
 app.use("/api", authRoutes);
 app.use("/api/game", gameRoutes);
 
-// Health check endpoint
 app.get("/", (req, res) => {
   res.json({
     message: "Bingo backend running",
@@ -103,20 +96,13 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Socket.io configuration - supports both web and mobile
 const io = new Server(server, {
   cors: {
-    origin: (origin, callback) => {
-      if (isAllowedOrigin(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Not allowed by CORS"));
-    },
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true,
   },
-  transports: ["websocket", "polling"], // support both transports for mobile
+  transports: ["websocket", "polling"],
 });
 
 initSocket(io);
@@ -126,15 +112,14 @@ server.listen(PORT, () => {
 ╔════════════════════════════════════════╗
 ║     Bingo Game Backend Running         ║
 ╠════════════════════════════════════════╣
-║ Port: ${PORT}
-║ Environment: ${NODE_ENV}
-║ URL: http://localhost:${PORT}
-║ WebSocket: ws://localhost:${PORT}
+║ Port: ${PORT}                          ║
+║ Environment: ${NODE_ENV}               ║
+║ URL: http://localhost:${PORT}          ║
+║ WebSocket: ws://localhost:${PORT}      ║
 ╚════════════════════════════════════════╝
   `);
 });
 
-// Handle graceful shutdown
 process.on("SIGTERM", () => {
   console.log("SIGTERM received, closing server...");
   server.close(() => {
