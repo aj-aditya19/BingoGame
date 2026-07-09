@@ -22,6 +22,7 @@ const corsOrigins = process.env.CORS_ORIGINS
   : ["http://localhost:5173", "http://localhost:3000"];
 
 const defaultHostedOrigins = ["https://bingogame-web-t73z.vercel.app"];
+// const defaultHostedOrigins = ["https://localhost:5173"];
 
 const allowedOrigins = new Set(
   [...corsOrigins, ...defaultHostedOrigins]

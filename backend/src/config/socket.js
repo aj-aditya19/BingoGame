@@ -1,6 +1,70 @@
 import { rooms } from "../routes/game.route.js";
 import User from "../database/User.js";
 
+const BOT_ROLE = "Bot";
+
+const getBotSocketId = (roomId, userId) => `bot:${roomId}:${userId}`;
+
+const isBotUser = (user) => user?.role === BOT_ROLE;
+
+const upsertRoomPlayer = (room, user, socketId, roomId) => {
+  const existingPlayer = room.players.find(
+    (player) => player.userId === user._id,
+  );
+  const storedSocketId = isBotUser(user)
+    ? getBotSocketId(roomId, user._id)
+    : socketId;
+
+  if (existingPlayer) {
+    existingPlayer.socketId = storedSocketId;
+    existingPlayer.name = user.name ?? existingPlayer.name;
+    existingPlayer.grid = user.grid ?? existingPlayer.grid;
+    existingPlayer.role = user.role ?? existingPlayer.role;
+    return;
+  }
+
+  if (room.players.length >= 2) {
+    console.log("Room full, cannot join", user._id);
+    return;
+  }
+
+  room.players.push({
+    userId: user._id,
+    name: user.name ?? "Unknown",
+    socketId: storedSocketId,
+    grid: user.grid ?? [],
+    playerNo: room.players.length + 1,
+    role: user.role ?? "Invited",
+  });
+};
+
+const getNextPlayer = (players, currentUserId) =>
+  players.find((player) => player.userId !== currentUserId);
+
+const updateStatsOnResult = async (winnerId, loserId) => {
+  try {
+    if (winnerId) {
+      await User.findByIdAndUpdate(winnerId, {
+        $inc: {
+          win: 1,
+          gamesPlayed: 1,
+        },
+      });
+    }
+
+    if (loserId) {
+      await User.findByIdAndUpdate(loserId, {
+        $inc: {
+          loss: 1,
+          gamesPlayed: 1,
+        },
+      });
+    }
+  } catch (err) {
+    console.log("Error updating stats:", err);
+  }
+};
+
 const initSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
@@ -9,34 +73,16 @@ const initSocket = (io) => {
       const room = rooms.get(roomId);
       if (!room) return;
 
-      const existing = room.players.find((p) => p.userId === user._id);
-      if (existing) {
-        existing.socketId = socket.id;
-        existing.name = user.name ?? existing.name;
-        existing.grid = user.grid ?? existing.grid;
-        existing.role = user.role ?? existing.role;
-      } else {
-        if (room.players.length >= 2) {
-          console.log("Room full, cannot join", user._id);
-          return;
-        }
-
-        room.players.push({
-          userId: user._id,
-          name: user.name ?? "Unknown",
-          socketId: socket.id,
-          grid: user.grid ?? [],
-          playerNo: room.players.length + 1,
-          role: user.role ?? "Invited",
-        });
-      }
+      upsertRoomPlayer(room, user, socket.id, roomId);
 
       socket.join(roomId);
       io.to(roomId).emit("room-joined", room.players);
-      try {
-        await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
-      } catch (err) {
-        console.log("Error updating lastLogin:", err);
+      if (!isBotUser(user)) {
+        try {
+          await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
+        } catch (err) {
+          console.log("Error updating lastLogin:", err);
+        }
       }
     });
 
@@ -62,15 +108,13 @@ const initSocket = (io) => {
       const room = rooms.get(roomId);
       if (!room || room.turnUserId !== userId) return;
 
-      // Emit number update
       io.to(roomId).emit("game:update", { number });
 
-      // Find next player safely
       if (room.players.length < 2) {
         console.log("⚠️ Waiting for opponent");
         return;
       }
-      const nextPlayer = room.players.find((p) => p.userId !== userId);
+      const nextPlayer = getNextPlayer(room.players, userId);
 
       if (!nextPlayer) {
         console.log("⚠️ No next player found");
@@ -92,21 +136,7 @@ const initSocket = (io) => {
       const winner = room.players.find((p) => p.userId === userId);
       const loser = room.players.find((p) => p.userId !== userId);
 
-      try {
-        if (winner) {
-          await User.findByIdAndUpdate(winner.userId, {
-            $inc: { win: 1, gamesPlayed: 1 },
-          });
-        }
-
-        if (loser) {
-          await User.findByIdAndUpdate(loser.userId, {
-            $inc: { loss: 1, gamesPlayed: 1 },
-          });
-        }
-      } catch (err) {
-        console.log("Error updating stats:", err);
-      }
+      await updateStatsOnResult(winner?.userId, loser?.userId);
 
       setTimeout(() => {
         rooms.delete(roomId);
@@ -120,12 +150,10 @@ const initSocket = (io) => {
 
       socket.leave(roomId);
 
-      // remove player from room
       room.players = room.players.filter((p) => p.socketId !== socket.id);
 
       io.to(roomId).emit("room-joined", room.players);
 
-      // agar room empty ho gaya to delete
       if (room.players.length === 0) {
         rooms.delete(roomId);
         console.log("🧹 Room deleted (empty):", roomId);
@@ -150,42 +178,28 @@ const initSocket = (io) => {
             (p) => p.userId === player.userId,
           );
 
-          // If user reconnected (socketId changed), do nothing
           if (stillExists && stillExists.socketId !== socket.id) {
             console.log("User reconnected, not removing");
             return;
           }
 
-          // Remove permanently
           room.players = room.players.filter((p) => p.userId !== player.userId);
 
           io.to(roomId).emit("room-joined", room.players);
 
-          // 🎯 If game started & only 1 left → give win
           if (room.started && room.players.length === 1) {
             const winnerId = room.players[0].userId;
 
             io.to(roomId).emit("game:win", { userId: winnerId });
 
-            try {
-              await User.findByIdAndUpdate(winnerId, {
-                $inc: { win: 1, gamesPlayed: 1 },
-              });
+            await updateStatsOnResult(winnerId, player.userId);
 
-              await User.findByIdAndUpdate(player.userId, {
-                $inc: { loss: 1, gamesPlayed: 1 },
-              });
-
-              console.log("Win/Loss updated due to disconnect");
-            } catch (err) {
-              console.log("Error updating disconnect stats:", err);
-            }
+            console.log("Win/Loss updated due to disconnect");
 
             rooms.delete(roomId);
             console.log("Room deleted after disconnect win:", roomId);
           }
 
-          // If empty
           if (room.players.length === 0) {
             rooms.delete(roomId);
             console.log("Room deleted (empty):", roomId);

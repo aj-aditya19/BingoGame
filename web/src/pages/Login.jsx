@@ -22,9 +22,7 @@ const Login = ({ onLogin, onRegister }) => {
 
     const res = await api.login(form);
     if (res.success) {
-      onLogin(res.user);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      setUser(res.data.user);
+      onLogin(res.user || res.data?.user);
     }
   };
 
@@ -34,7 +32,7 @@ const Login = ({ onLogin, onRegister }) => {
 
     const res = await api.googleAuth(token);
     if (res.success) {
-      onLogin(res.user);
+      onLogin(res.user || res.data?.user);
     }
   };
 
@@ -51,7 +49,13 @@ const Login = ({ onLogin, onRegister }) => {
             value={form.email}
             onChange={handleChange}
           />
-
+          <div className="login-password-container">
+            In case login failed: enter email as password
+          </div>
+          <div className="login-password-container">
+            For example: if email is "john@example.com", use "john" as the
+            password
+          </div>
           <input
             className="login-input"
             name="password"

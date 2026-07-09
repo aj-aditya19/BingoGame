@@ -3,7 +3,14 @@ import { socket } from "../services/socket";
 import { gameApi } from "../services/api";
 import "../styles/CreateRoom.css";
 
-const CreateRoom = ({ grid, user, onCreated }) => {
+const CreateRoom = ({
+  grid,
+  user,
+  botOpponent,
+  botGrid,
+  autoStartGame,
+  onCreated,
+}) => {
   const [roomId, setRoomId] = useState(null);
   const [copyStatus, setCopyStatus] = useState("");
 
@@ -23,6 +30,24 @@ const CreateRoom = ({ grid, user, onCreated }) => {
           role: "Host",
         },
       });
+
+      if (botOpponent && botGrid) {
+        socket.emit("join-room", {
+          roomId: res.roomId,
+          user: {
+            _id: botOpponent._id,
+            name: botOpponent.name,
+            grid: botGrid,
+            role: "Bot",
+          },
+        });
+      }
+
+      if (autoStartGame) {
+        socket.emit("start-game", { roomId: res.roomId });
+      }
+
+      onCreated(res.roomId);
     };
 
     create();

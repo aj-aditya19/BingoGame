@@ -1,34 +1,38 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+const requestJson = async (path, options = {}) => {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    credentials: "include",
+    ...options,
+  });
+
+  return response.json();
+};
+
 export const api = {
   login: async (data) => {
-    const res = await fetch(`${BASE_URL}/login`, {
+    return requestJson("/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify(data),
     });
-    return res.json();
   },
 
   register: async (data) => {
-    const res = await fetch(`${BASE_URL}/register`, {
+    return requestJson("/register", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify(data),
     });
-    return res.json();
   },
 
   googleAuth: async (token) => {
-    const res = await fetch(`${BASE_URL}/google`, {
+    return requestJson("/google", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ token }),
     });
-    return res.json();
   },
 
   // ===============================
@@ -39,23 +43,15 @@ export const gameApi = {
   createRoom: async () => {
     console.log("In creating a Room");
 
-    const res = await fetch(`${BASE_URL}/game/room/create`, {
+    return requestJson("/game/room/create", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
     });
-
-    return res.json();
   },
 
   joinRoom: async (roomId) => {
-    const res = await fetch(`${BASE_URL}/game/room/join`, {
+    return requestJson("/game/room/join", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ roomId }),
     });
-
-    return res.json();
   },
 };

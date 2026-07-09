@@ -1,1 +1,3 @@
 .env
+/src/database/date.js
+/src/database/seed.js

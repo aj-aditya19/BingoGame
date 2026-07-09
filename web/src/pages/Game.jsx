@@ -1,25 +1,52 @@
 import React, { useEffect, useState } from "react";
 import { socket } from "../services/socket";
+import {
+  cloneGrid,
+  evaluateGrid,
+  markNumber,
+  pickBotMove,
+} from "../utils/bingoGame";
 import "../styles/Game.css";
 
 const Game = ({
   roomId,
+  offlineMode = false,
   initialGrid,
   myUserId,
   initialTurnUserId,
+  botPlayerId,
+  botPlayerName = "Opponent",
+  botInitialGrid,
   onGameEnd,
 }) => {
-  const [grid, setGrid] = useState(initialGrid);
-  const [currentTurn, setCurrentTurn] = useState(null);
+  const [grid, setGrid] = useState(() => cloneGrid(initialGrid));
+  const [botGrid, setBotGrid] = useState(() =>
+    botInitialGrid ? cloneGrid(botInitialGrid) : null,
+  );
+  const [currentTurn, setCurrentTurn] = useState(offlineMode ? myUserId : null);
   const [winner, setWinner] = useState(null);
 
-  useEffect(() => {
-    if (initialTurnUserId) {
-      setCurrentTurn(initialTurnUserId);
-    }
-  }, [initialTurnUserId]);
+  const isBotGame = offlineMode && !!botPlayerId;
 
   useEffect(() => {
+    setGrid(cloneGrid(initialGrid));
+  }, [initialGrid]);
+
+  useEffect(() => {
+    if (botInitialGrid) {
+      setBotGrid(cloneGrid(botInitialGrid));
+    }
+  }, [botInitialGrid]);
+
+  useEffect(() => {
+    if (!offlineMode && initialTurnUserId) {
+      setCurrentTurn(initialTurnUserId);
+    }
+  }, [offlineMode, initialTurnUserId]);
+
+  useEffect(() => {
+    if (offlineMode) return undefined;
+
     const onGameStart = ({ turnUserId }) => {
       setCurrentTurn(turnUserId);
     };
@@ -30,22 +57,16 @@ const Game = ({
 
     const onUpdate = ({ number }) => {
       setGrid((prev) => {
-        const updated = prev.map((row) =>
-          row.map((cell) =>
-            cell.value === number ? { ...cell, chosen: true } : { ...cell },
-          ),
-        );
+        const nextState = evaluateGrid(markNumber(prev, number));
 
-        const { newGrid, win } = checkWin(updated);
-
-        if (!winner && currentTurn === myUserId && win) {
+        if (nextState.win && !winner) {
           socket.emit("game:win", {
             roomId,
             userId: myUserId,
           });
         }
 
-        return newGrid;
+        return nextState.newGrid;
       });
     };
 
@@ -53,7 +74,12 @@ const Game = ({
       setWinner(userId);
 
       onGameEnd({
-        winnerName: userId === myUserId ? "You" : "Opponent",
+        winnerName:
+          userId === myUserId
+            ? "You"
+            : botPlayerId
+              ? botPlayerName
+              : "Opponent",
         draw: false,
       });
     };
@@ -69,13 +95,79 @@ const Game = ({
       socket.off("game:update", onUpdate);
       socket.off("game:win", onWin);
     };
-  }, [roomId, myUserId, winner, currentTurn, onGameEnd]);
+  }, [offlineMode, myUserId, botPlayerId, botPlayerName, onGameEnd]);
 
-  const isLocked = currentTurn !== myUserId || !!winner;
+  const finishOfflineGame = (winnerId, draw = false) => {
+    setWinner(draw ? "draw" : winnerId);
+    onGameEnd({
+      winnerName:
+        draw || !winnerId ? "" : winnerId === myUserId ? "You" : botPlayerName,
+      draw,
+    });
+  };
+
+  const applyOfflineMove = (number) => {
+    const nextHumanState = evaluateGrid(markNumber(grid, number));
+    const nextBotState = botGrid
+      ? evaluateGrid(markNumber(botGrid, number))
+      : null;
+
+    setGrid(nextHumanState.newGrid);
+    if (nextBotState) {
+      setBotGrid(nextBotState.newGrid);
+    }
+
+    if (nextHumanState.win && nextBotState?.win) {
+      finishOfflineGame(null, true);
+      return;
+    }
+
+    if (nextHumanState.win) {
+      finishOfflineGame(myUserId, false);
+      return;
+    }
+
+    if (nextBotState?.win) {
+      finishOfflineGame(botPlayerId, false);
+      return;
+    }
+
+    setCurrentTurn((prev) =>
+      prev === myUserId && botPlayerId ? botPlayerId : myUserId,
+    );
+  };
+
+  useEffect(() => {
+    if (!isBotGame || winner || currentTurn !== botPlayerId || !botGrid) {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      const selectedNumber = pickBotMove(botGrid, grid);
+
+      if (selectedNumber === null) {
+        finishOfflineGame(null, true);
+        return;
+      }
+
+      applyOfflineMove(selectedNumber);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [isBotGame, botPlayerId, botGrid, grid, currentTurn, winner]);
+
+  const isLocked = offlineMode
+    ? currentTurn !== myUserId || !!winner
+    : currentTurn !== myUserId || !!winner;
 
   const selectNumber = (cell) => {
     if (isLocked) return;
     if (cell.chosen) return;
+
+    if (offlineMode) {
+      applyOfflineMove(cell.value);
+      return;
+    }
 
     socket.emit("game:select-number", {
       roomId,
@@ -84,59 +176,23 @@ const Game = ({
     });
   };
 
-  // ✅ UPDATED WIN CHECK WITH LINE HIGHLIGHT
-  const checkWin = (grid) => {
-    let lines = 0;
-
-    // Deep copy grid
-    const updated = grid.map((row) =>
-      row.map((cell) => ({ ...cell, completed: false })),
-    );
-
-    // Rows
-    for (let r = 0; r < 5; r++) {
-      if (updated[r].every((c) => c.chosen)) {
-        lines++;
-        updated[r].forEach((c) => (c.completed = true));
-      }
-    }
-
-    // Columns
-    for (let c = 0; c < 5; c++) {
-      if (updated.every((row) => row[c].chosen)) {
-        lines++;
-        updated.forEach((row) => (row[c].completed = true));
-      }
-    }
-
-    // Diagonal 1
-    if (updated.every((row, i) => row[i].chosen)) {
-      lines++;
-      updated.forEach((row, i) => (row[i].completed = true));
-    }
-
-    // Diagonal 2
-    if (updated.every((row, i) => row[4 - i].chosen)) {
-      lines++;
-      updated.forEach((row, i) => (row[4 - i].completed = true));
-    }
-
-    return {
-      newGrid: updated,
-      win: lines >= 5,
-    };
-  };
-
   const getTitle = () => {
     if (winner) {
+      if (winner === "draw") {
+        return { text: "Draw", class: "turn" };
+      }
+
       return winner === myUserId
-        ? { text: "🎉 You Win", class: "win" }
-        : { text: "😢 You Lost", class: "lose" };
+        ? { text: "You Win", class: "win" }
+        : { text: "You Lost", class: "lose" };
     }
 
     return currentTurn === myUserId
       ? { text: "Your Turn", class: "turn" }
-      : { text: "Opponent Turn", class: "turn" };
+      : {
+          text: `${botPlayerId ? botPlayerName : "Opponent"} Turn`,
+          class: "turn",
+        };
   };
 
   const title = getTitle();

@@ -1,5 +1,72 @@
 
 .app-shell {
 	min-height: 100vh;
-	background: transparent;
+	position: relative;
+	overflow: hidden;
+	background:
+		radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 30%),
+		radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 28%),
+		linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+}
+
+.app-shell::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 35%),
+		radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.45), transparent 22%);
+	pointer-events: none;
+}
+
+.app-shell > * {
+	position: relative;
+	z-index: 1;
+}
+
+.app-actions {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	padding: 16px 16px 0;
+	max-width: 960px;
+	margin: 0 auto;
+	flex-wrap: wrap;
+	pointer-events: none;
+}
+
+.app-actions > * {
+	pointer-events: auto;
+}
+
+.app-action-btn {
+	border: 0;
+	border-radius: 999px;
+	padding: 10px 16px;
+	font-weight: 700;
+	cursor: pointer;
+	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease,
+		background 0.2s ease;
+}
+
+.app-action-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+}
+
+.app-action-btn.secondary {
+	background: rgba(255, 255, 255, 0.92);
+	color: #1e293b;
+	border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.app-action-btn.danger {
+	background: linear-gradient(135deg, #ef4444, #dc2626);
+	color: #ffffff;
 }

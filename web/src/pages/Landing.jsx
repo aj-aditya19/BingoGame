@@ -1,7 +1,7 @@
 import React from "react";
 import "../styles/Landing.css";
 
-const Landing = ({ onLogin, onRegister }) => {
+const Landing = ({ onPlayWithBot, gotohomepage, onLogin }) => {
   return (
     <div className="landing-container">
       <div className="landing-grid" />
@@ -21,16 +21,16 @@ const Landing = ({ onLogin, onRegister }) => {
 
           <div className="landing-actions">
             <button
-              onClick={onLogin}
+              onClick={onPlayWithBot}
               className="landing-btn landing-btn-primary"
             >
-              Login
+              Play Offline with Bot
             </button>
             <button
-              onClick={onRegister}
+              onClick={onLogin}
               className="landing-btn landing-btn-secondary"
             >
-              Create Account
+              Play with Friends
             </button>
           </div>
 

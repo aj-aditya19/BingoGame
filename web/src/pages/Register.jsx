@@ -4,7 +4,7 @@ import { auth, googleProvider } from "../services/firebase";
 import { signInWithPopup } from "firebase/auth";
 import "../styles/Register.css";
 
-export default function Register({ onRegister }) {
+export default function Register({ onRegister, onLogin }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -26,8 +26,7 @@ export default function Register({ onRegister }) {
     try {
       const res = await api.register(form);
       if (res.success) {
-        localStorage.setItem("user", JSON.stringify(res.user));
-        if (onRegister) onRegister(res.user);
+        if (onRegister) onRegister(res.user || res.data?.user);
       } else {
         alert(res.message || "Registration failed");
       }
@@ -45,8 +44,7 @@ export default function Register({ onRegister }) {
       const res = await api.googleAuth(token);
 
       if (res.success) {
-        localStorage.setItem("user", JSON.stringify(res.user));
-        if (onRegister) onRegister();
+        if (onRegister) onRegister(res.user || res.data?.user);
       } else {
         alert(res.message || "Google login failed");
       }
@@ -94,6 +92,13 @@ export default function Register({ onRegister }) {
         <button className="google-register-btn" onClick={handleGoogleRegister}>
           Continue with Google
         </button>
+
+        <p className="register-text">
+          Already have an account?{" "}
+          <span className="register-link" onClick={onLogin}>
+            Login
+          </span>
+        </p>
       </div>
     </div>
   );
