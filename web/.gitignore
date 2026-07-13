@@ -24,3 +24,26 @@ dist-ssr
 *.sw?
 
 .env
+# dependencies
+node_modules/
+backend/node_modules/
+web/node_modules/
+
+# environment
+.env
+.env.*
+
+# logs
+logs/
+*.log
+
+# build
+dist/
+build/
+
+# vscode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

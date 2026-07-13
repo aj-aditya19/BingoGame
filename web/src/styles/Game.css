@@ -63,3 +63,57 @@
   color: #92400e;
   border-color: #f9d58b;
 }
+
+.game-content {
+    display: flex;
+    gap: 24px;
+    align-items: flex-end;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.game-grid {
+    flex: 1;
+}
+
+.game-container {
+  max-width: 1000px;   /* 700 se increase */
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 20px 12px 28px;
+  text-align: center;
+}
+@media (max-width: 900px){
+
+    .game-content{
+        flex-direction:column;
+        align-items:center;
+    }
+
+    .game-grid{
+        width:100%;
+    }
+
+    .chatbox-container{
+        width:100%;
+        max-width:700px;
+    }
+
+}
+
+.game-content {
+    display: flex;
+    gap: 24px;
+    align-items: stretch;
+}
+
+
+
+.chatbox-container{
+    width:340px;
+    height:560px;
+}
+
+.chatbox-container{
+    height:600px;
+}

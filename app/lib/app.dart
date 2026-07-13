@@ -10,6 +10,7 @@ import 'pages/join_room.dart';
 import 'pages/lobby.dart';
 import 'pages/game.dart';
 import 'pages/result.dart';
+import 'pages/create_bot.dart';
 
 import 'services/socket_service.dart';
 
@@ -36,9 +37,12 @@ class _AppControllerState extends State<AppController> {
   String page = "landing";
 
   String? mode;
+  String? playMode;
   String? roomId;
 
   dynamic gameGrid;
+  dynamic botPlayer;
+  dynamic botGrid;
   List players = [];
 
   String? winner;
@@ -81,10 +85,51 @@ class _AppControllerState extends State<AppController> {
       winner = null;
       isDraw = false;
       gameGrid = null;
+      botPlayer = null;
+      botGrid = null;
       roomId = null;
       mode = null;
+      playMode = null;
       players = [];
       page = "home";
+    });
+  }
+
+  void handleLogout() {
+    resetGame();
+    setState(() {
+      user = null;
+      page = "landing";
+    });
+  }
+
+  void handleCancelGame() {
+    resetGame();
+  }
+
+  void handlePlayWithBot() {
+    // Set guest user if not logged in
+    if (user == null) {
+      setState(() {
+        user = {
+          "_id": "guest-${DateTime.now().millisecondsSinceEpoch}",
+          "name": "Guest Player",
+          "role": "Guest",
+        };
+        playMode = "bot";
+        page = "grid";
+      });
+    } else {
+      setState(() {
+        playMode = "bot";
+        page = "grid";
+      });
+    }
+  }
+
+  void handlePlayWithFriends() {
+    setState(() {
+      page = "login";
     });
   }
 
@@ -93,8 +138,8 @@ class _AppControllerState extends State<AppController> {
     switch (page) {
       case "landing":
         return LandingScreen(
-          onLogin: () => setState(() => page = "login"),
-          onRegister: () => setState(() => page = "register"),
+          onPlayWithBot: handlePlayWithBot,
+          onPlayWithFriends: handlePlayWithFriends,
         );
 
       case "login":
@@ -123,15 +168,19 @@ class _AppControllerState extends State<AppController> {
           onCreateRoom: () {
             setState(() {
               mode = "create";
+              playMode = "multiplayer";
               page = "grid";
             });
           },
           onJoinRoom: () {
             setState(() {
               mode = "join";
+              playMode = "multiplayer";
               page = "grid";
             });
           },
+          onPlayBot: handlePlayWithBot,
+          onLogout: handleLogout,
         );
 
       case "grid":
@@ -139,7 +188,22 @@ class _AppControllerState extends State<AppController> {
           onDone: (grid) {
             setState(() {
               gameGrid = grid;
-              page = mode == "create" ? "create-room" : "join-room";
+              if (playMode == "bot") {
+                page = "bot-setup";
+              } else {
+                page = mode == "create" ? "create-room" : "join-room";
+              }
+            });
+          },
+        );
+
+      case "bot-setup":
+        return CreateBotScreen(
+          onBotReady: (bot, grid) {
+            setState(() {
+              botPlayer = bot;
+              botGrid = grid;
+              page = "game";
             });
           },
         );
@@ -192,6 +256,9 @@ class _AppControllerState extends State<AppController> {
               page = "result";
             });
           },
+          onCancel: handleCancelGame,
+          onLogout: handleLogout,
+          isBotGame: playMode == "bot",
         );
 
       case "result":

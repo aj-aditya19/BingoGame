@@ -7,6 +7,9 @@ class GameScreen extends StatefulWidget {
   final String myUserId;
   final String initialTurnUserId;
   final Function(Map<String, dynamic>) onGameEnd;
+  final VoidCallback? onCancel;
+  final VoidCallback? onLogout;
+  final bool isBotGame;
 
   const GameScreen({
     super.key,
@@ -15,6 +18,9 @@ class GameScreen extends StatefulWidget {
     required this.myUserId,
     required this.initialTurnUserId,
     required this.onGameEnd,
+    this.onCancel,
+    this.onLogout,
+    this.isBotGame = false,
   });
 
   @override
@@ -208,7 +214,17 @@ class _GameScreenState extends State<GameScreen> {
     final cells = grid.expand((row) => row).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Bingo Game")),
+      appBar: AppBar(
+        title: const Text("Bingo Game"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: widget.onLogout,
+            tooltip: "Logout",
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -254,6 +270,21 @@ class _GameScreenState extends State<GameScreen> {
                 },
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            if (widget.isBotGame)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: widget.onCancel,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text("Cancel Game"),
+                ),
+              ),
           ],
         ),
       ),

@@ -6,6 +6,7 @@ import {
   markNumber,
   pickBotMove,
 } from "../utils/bingoGame";
+import ChatBox from "./ChatBox";
 import "../styles/Game.css";
 
 const Game = ({
@@ -13,6 +14,7 @@ const Game = ({
   offlineMode = false,
   initialGrid,
   myUserId,
+  myName,
   initialTurnUserId,
   botPlayerId,
   botPlayerName = "Opponent",
@@ -198,23 +200,52 @@ const Game = ({
   const title = getTitle();
 
   return (
+    // <div className="game-container">
+    //   <h3 className={`game-title ${title.class}`}>{title.text}</h3>
+
+    //   <div className="game-grid">
+    //     {grid.flat().map((cell, i) => (
+    //       <button
+    //         key={i}
+    //         onClick={() => selectNumber(cell)}
+    //         disabled={cell.chosen || isLocked}
+    //         className={`game-cell
+    //           ${cell.chosen ? "chosen" : ""}
+    //           ${cell.completed ? "completed" : ""}
+    //         `}
+    //       >
+    //         {cell.value}
+    //       </button>
+    //     ))}
+    //   </div>
+
+    //   {!offlineMode && (
+    //     <ChatBox roomId={roomId} myUserId={myUserId} myName={myName} />
+    //   )}
+    // </div>
     <div className="game-container">
       <h3 className={`game-title ${title.class}`}>{title.text}</h3>
 
-      <div className="game-grid">
-        {grid.flat().map((cell, i) => (
-          <button
-            key={i}
-            onClick={() => selectNumber(cell)}
-            disabled={cell.chosen || isLocked}
-            className={`game-cell 
-              ${cell.chosen ? "chosen" : ""} 
-              ${cell.completed ? "completed" : ""}
-            `}
-          >
-            {cell.value}
-          </button>
-        ))}
+      <div className="game-content">
+        <div className="game-grid">
+          {grid.flat().map((cell, i) => (
+            <button
+              key={i}
+              onClick={() => selectNumber(cell)}
+              disabled={cell.chosen || isLocked}
+              className={`game-cell
+            ${cell.chosen ? "chosen" : ""}
+            ${cell.completed ? "completed" : ""}
+          `}
+            >
+              {cell.value}
+            </button>
+          ))}
+        </div>
+
+        {!offlineMode && (
+          <ChatBox roomId={roomId} myUserId={myUserId} myName={myName} />
+        )}
       </div>
     </div>
   );
