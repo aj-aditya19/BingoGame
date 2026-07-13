@@ -4,7 +4,7 @@
 # dependencies
 node_modules/
 backend/node_modules/
-web/node_modules/
+
 
 # environment
 .env
