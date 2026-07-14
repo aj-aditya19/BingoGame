@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../services/socket_service.dart';
+import '../theme/app_theme.dart';
 
 class LobbyScreen extends StatelessWidget {
   final String roomId;
@@ -24,126 +23,169 @@ class LobbyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Game Lobby")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const Text(
-              "🎮 Game Lobby",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
+      body: AppBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                children: [
+                  const Text(
+                    "🎮 Game Lobby",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.text,
+                    ),
+                  ),
 
-            const SizedBox(height: 12),
+                  const SizedBox(height: 6),
 
-            Text(
-              "Room ID: $roomId",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
+                  Text(
+                    "Room ID: $roomId",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppColors.muted,
+                    ),
+                  ),
 
-            const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
-            _sectionTitle("Players"),
+                  _sectionTitle("Players"),
 
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(
-                      "✅ ${player1?["name"] ?? "Player 1"} "
-                      "(${player1?["role"] ?? "Player"})",
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        children: [
+                          _playerRow(
+                            "✅ ${player1?["name"] ?? "Player 1"} "
+                            "(${player1?["role"] ?? "Player"})",
+                          ),
+                          const SizedBox(height: 8),
+                          _playerRow(
+                            player2 != null
+                                ? "✅ ${player2["name"]} "
+                                      "(${player2["role"] ?? "Player"})"
+                                : "⏳ Waiting for Player 2...",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  _sectionTitle("Grids Preview"),
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: GridPreview(
+                          title: "Player 1",
+                          grid: player1?["grid"],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: GridPreview(
+                          title: "Player 2",
+                          grid: player2?["grid"],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  _sectionTitle("Rules"),
+
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            "• Players take turns",
+                            style: TextStyle(color: AppColors.muted),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            "• Strike numbers one by one",
+                            style: TextStyle(color: AppColors.muted),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            "• Complete BINGO to win",
+                            style: TextStyle(color: AppColors.muted),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  if (isHost && player2 != null)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: onStartGame,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.accent,
+                        ),
+                        child: const Text("🚀 Let's Play"),
+                      ),
                     ),
 
-                    const SizedBox(height: 10),
-
-                    Text(
-                      player2 != null
-                          ? "✅ ${player2["name"]} "
-                                "(${player2["role"] ?? "Player"})"
-                          : "⏳ Waiting for Player 2...",
+                  if (isHost && player2 == null)
+                    const Text(
+                      "Waiting for another player...",
+                      style: TextStyle(fontSize: 15, color: AppColors.muted),
                     ),
-                  ],
-                ),
+
+                  if (!isHost)
+                    const Text(
+                      "Waiting for the host to start the game...",
+                      style: TextStyle(fontSize: 15, color: AppColors.muted),
+                    ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            _sectionTitle("Grids Preview"),
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: GridPreview(title: "Player 1", grid: player1?["grid"]),
-                ),
-
-                const SizedBox(width: 12),
-
-                Expanded(
-                  child: GridPreview(title: "Player 2", grid: player2?["grid"]),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            _sectionTitle("Rules"),
-
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: const [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("• Players take turns"),
-                    ),
-                    SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("• Strike numbers one by one"),
-                    ),
-                    SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("• Complete BINGO to win"),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            if (isHost && player2 != null)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onStartGame,
-                  child: const Text("🚀 Let's Play"),
-                ),
-              ),
-
-            if (isHost && player2 == null)
-              const Text(
-                "Waiting for another player...",
-                style: TextStyle(fontSize: 16),
-              ),
-          ],
+          ),
         ),
       ),
     );
   }
 
+  Widget _playerRow(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.bgSoft,
+        border: Border.all(color: AppColors.line),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(text, style: const TextStyle(color: AppColors.text)),
+    );
+  }
+
   Widget _sectionTitle(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 10, top: 4),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           text,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.text,
+          ),
         ),
       ),
     );
@@ -161,12 +203,18 @@ class GridPreview extends StatelessWidget {
     if (grid == null) {
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           child: Column(
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text,
+                ),
+              ),
               const SizedBox(height: 10),
-              const Text("Not Ready"),
+              const Text("Not Ready", style: TextStyle(color: AppColors.muted)),
             ],
           ),
         ),
@@ -177,13 +225,17 @@ class GridPreview extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         child: Column(
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-
-            const SizedBox(height: 10),
-
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: AppColors.text,
+              ),
+            ),
+            const SizedBox(height: 8),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -198,10 +250,19 @@ class GridPreview extends StatelessWidget {
 
                 return Container(
                   decoration: BoxDecoration(
-                    border: Border.all(),
+                    color: AppColors.bgSoft,
+                    border: Border.all(color: AppColors.line),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Center(child: Text(cell["value"].toString())),
+                  child: Center(
+                    child: Text(
+                      cell["value"].toString(),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.text,
+                      ),
+                    ),
+                  ),
                 );
               },
             ),

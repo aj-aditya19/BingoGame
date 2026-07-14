@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 
 class RegisterScreen extends StatefulWidget {
   final Function(dynamic user) onRegister;
@@ -56,40 +57,61 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Create Account")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: "Name"),
+    return CenteredCardPage(
+      maxWidth: 440,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Create Account",
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: AppColors.text,
             ),
+          ),
 
-            const SizedBox(height: 15),
+          const SizedBox(height: 20),
 
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
-            ),
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: "Name"),
+          ),
 
-            const SizedBox(height: 15),
+          const SizedBox(height: 12),
 
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: "Password"),
-            ),
+          TextField(
+            controller: emailController,
+            decoration: const InputDecoration(labelText: "Email"),
+          ),
 
-            const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
-            ElevatedButton(
+          TextField(
+            controller: passwordController,
+            obscureText: true,
+            decoration: const InputDecoration(labelText: "Password"),
+          ),
+
+          const SizedBox(height: 18),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
               onPressed: loading ? null : register,
-              child: const Text("Register"),
+              child: loading
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text("Register"),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

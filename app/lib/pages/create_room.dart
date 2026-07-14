@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
+import '../theme/app_theme.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   final dynamic grid;
@@ -85,68 +86,92 @@ class _CreateRoomScreenState extends State<CreateRoomScreen> {
   @override
   Widget build(BuildContext context) {
     if (roomId == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: const Text("Create Room")),
-      body: Center(
-        child: Card(
-          elevation: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Room Created",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      roomId!,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    IconButton(
-                      onPressed: _copyRoomId,
-                      icon: const Icon(Icons.copy),
-                    ),
-                  ],
-                ),
-
-                if (copyStatus.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      copyStatus,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-
-                const SizedBox(height: 20),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      widget.onCreated(roomId!);
-                    },
-                    child: const Text("Go To Lobby"),
-                  ),
-                ),
-              ],
-            ),
+      return AppBackground(
+        child: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: AppColors.accent2),
+              SizedBox(height: 16),
+              Text(
+                "Creating room...",
+                style: TextStyle(color: AppColors.muted),
+              ),
+            ],
           ),
         ),
+      );
+    }
+
+    return CenteredCardPage(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Room Created",
+            style: TextStyle(fontSize: 15, color: AppColors.muted),
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                roomId!,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 4,
+                  color: AppColors.accentDark,
+                ),
+              ),
+              const SizedBox(width: 6),
+              InkWell(
+                onTap: _copyRoomId,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.softBlueBg,
+                    border: Border.all(color: AppColors.softBlueBorder),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.copy,
+                    size: 18,
+                    color: AppColors.accentDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          SizedBox(
+            height: 20,
+            child: Text(
+              copyStatus,
+              style: const TextStyle(color: AppColors.muted, fontSize: 13),
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                widget.onCreated(roomId!);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+              ),
+              child: const Text("Go To Lobby"),
+            ),
+          ),
+        ],
       ),
     );
   }

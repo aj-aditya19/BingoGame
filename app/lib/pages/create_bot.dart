@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../theme/app_theme.dart';
 
 class CreateBotScreen extends StatefulWidget {
   final Function(Map<String, dynamic>, List<List<Map<String, dynamic>>>)
@@ -19,10 +20,8 @@ class _CreateBotScreenState extends State<CreateBotScreen> {
   }
 
   void _initializeBot() {
-    // Create bot player
     final botPlayer = {'_id': 'bot', 'name': 'Bingo Bot', 'role': 'Bot'};
 
-    // Create bot grid with random numbers 1-25
     final used = <int>{};
     final random = Random();
     final grid = List<List<Map<String, dynamic>>>.generate(
@@ -38,7 +37,6 @@ class _CreateBotScreenState extends State<CreateBotScreen> {
       }),
     );
 
-    // Notify parent that bot is ready
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         widget.onBotReady(botPlayer, grid);
@@ -49,15 +47,20 @@ class _CreateBotScreenState extends State<CreateBotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Creating Bot...'), centerTitle: true),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 20),
-            Text('Preparing Bot...', style: TextStyle(fontSize: 18)),
-          ],
+      appBar: AppBar(title: const Text('Creating Bot...')),
+      body: AppBackground(
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: AppColors.accent2),
+              SizedBox(height: 20),
+              Text(
+                'Preparing Bot...',
+                style: TextStyle(fontSize: 16, color: AppColors.muted),
+              ),
+            ],
+          ),
         ),
       ),
     );

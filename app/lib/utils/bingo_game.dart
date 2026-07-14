@@ -38,34 +38,49 @@ class BingoGameUtils {
   }
 
   static bool _checkWin(List<List<Map<String, dynamic>>> grid) {
-    // Check rows
-    for (var row in grid) {
-      if (row.every((cell) => cell['chosen'] == true)) {
-        return true;
+    int completedLines = 0;
+    for (int r = 0; r < 5; r++) {
+      if (grid[r].every((cell) => cell['chosen'] == true)) {
+        completedLines++;
       }
     }
 
-    // Check columns
-    for (int col = 0; col < 5; col++) {
-      bool colWin = true;
-      for (int row = 0; row < 5; row++) {
-        if (grid[row][col]['chosen'] != true) {
-          colWin = false;
+    for (int c = 0; c < 5; c++) {
+      bool full = true;
+      for (int r = 0; r < 5; r++) {
+        if (grid[r][c]['chosen'] != true) {
+          full = false;
           break;
         }
       }
-      if (colWin) return true;
+      if (full) {
+        completedLines++;
+      }
     }
 
-    // Check diagonals
     bool diag1 = true;
+    for (int i = 0; i < 5; i++) {
+      if (grid[i][i]['chosen'] != true) {
+        diag1 = false;
+        break;
+      }
+    }
+    if (diag1) {
+      completedLines++;
+    }
     bool diag2 = true;
     for (int i = 0; i < 5; i++) {
-      if (grid[i][i]['chosen'] != true) diag1 = false;
-      if (grid[i][4 - i]['chosen'] != true) diag2 = false;
+      if (grid[i][4 - i]['chosen'] != true) {
+        diag2 = false;
+        break;
+      }
     }
 
-    return diag1 || diag2;
+    if (diag2) {
+      completedLines++;
+    }
+
+    return completedLines >= 5;
   }
 
   static Map<String, dynamic> evaluateGrid(
@@ -73,39 +88,82 @@ class BingoGameUtils {
   ) {
     int score = 0;
 
-    // Score rows
-    for (var row in grid) {
-      int count = row.where((cell) => cell['chosen'] == true).length;
-      score += count * count;
-    }
+    final updated = grid
+        .map((row) => row.map((cell) => {...cell, "completed": false}).toList())
+        .toList();
 
-    // Score columns
-    for (int col = 0; col < 5; col++) {
-      int count = 0;
-      for (int row = 0; row < 5; row++) {
-        if (grid[row][col]['chosen'] == true) count++;
+    int completedLines = 0;
+
+    for (int r = 0; r < 5; r++) {
+      int count = updated[r].where((cell) => cell["chosen"] == true).length;
+      score += count * count;
+
+      if (count == 5) {
+        completedLines++;
+        for (var cell in updated[r]) {
+          cell["completed"] = true;
+        }
       }
+    }
+
+    for (int c = 0; c < 5; c++) {
+      int count = 0;
+
+      for (int r = 0; r < 5; r++) {
+        if (updated[r][c]["chosen"] == true) count++;
+      }
+
       score += count * count;
+
+      if (count == 5) {
+        completedLines++;
+
+        for (int r = 0; r < 5; r++) {
+          updated[r][c]["completed"] = true;
+        }
+      }
     }
 
-    // Score diagonals
     int diag1 = 0;
-    int diag2 = 0;
+
     for (int i = 0; i < 5; i++) {
-      if (grid[i][i]['chosen'] == true) diag1++;
-      if (grid[i][4 - i]['chosen'] == true) diag2++;
+      if (updated[i][i]["chosen"] == true) diag1++;
     }
-    score += diag1 * diag1 + diag2 * diag2;
 
-    final win = _checkWin(grid);
+    score += diag1 * diag1;
 
-    return {'score': score, 'win': win, 'newGrid': grid};
+    if (diag1 == 5) {
+      completedLines++;
+
+      for (int i = 0; i < 5; i++) {
+        updated[i][i]["completed"] = true;
+      }
+    }
+
+    int diag2 = 0;
+
+    for (int i = 0; i < 5; i++) {
+      if (updated[i][4 - i]["chosen"] == true) diag2++;
+    }
+
+    score += diag2 * diag2;
+
+    if (diag2 == 5) {
+      completedLines++;
+
+      for (int i = 0; i < 5; i++) {
+        updated[i][4 - i]["completed"] = true;
+      }
+    }
+
+    return {"score": score, "win": completedLines >= 5, "newGrid": updated};
   }
 
   static int? pickBotMove(
     List<List<Map<String, dynamic>>> botGrid,
     List<List<Map<String, dynamic>>> humanGrid,
   ) {
+    final random = Random();
     final candidates = getAvailableNumbers(botGrid);
 
     if (candidates.isEmpty) return null;
@@ -120,7 +178,6 @@ class BingoGameUtils {
       final nextHumanResult = markNumber(humanGrid, candidate);
       final nextHumanEval = evaluateGrid(nextHumanResult['newGrid']);
 
-      // If both can win with this number, prioritize blocking
       if (nextBotEval['win'] && nextHumanEval['win']) {
         if (bestScore < 5000) {
           bestMove = candidate;
@@ -129,7 +186,6 @@ class BingoGameUtils {
         continue;
       }
 
-      // If bot wins with this move, take it
       if (nextBotEval['win']) {
         if (bestScore < 10000) {
           bestMove = candidate;
@@ -138,7 +194,6 @@ class BingoGameUtils {
         continue;
       }
 
-      // If human would win, block it
       if (nextHumanEval['win']) {
         if (bestScore < -10000) {
           bestMove = candidate;
@@ -147,7 +202,6 @@ class BingoGameUtils {
         continue;
       }
 
-      // Look ahead one move
       final remainingNumbers = getAvailableNumbers(nextBotEval['newGrid']);
       double worstHumanReply = double.infinity;
 
@@ -174,6 +228,10 @@ class BingoGameUtils {
       }
     }
 
-    return bestMove;
+    if (random.nextBool()) {
+      return bestMove;
+    } else {
+      return candidates[random.nextInt(candidates.length)];
+    }
   }
 }

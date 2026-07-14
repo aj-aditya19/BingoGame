@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
+import '../theme/app_theme.dart';
 
 class JoinRoomScreen extends StatefulWidget {
   final dynamic grid;
@@ -89,54 +90,49 @@ class _JoinRoomScreenState extends State<JoinRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Join Room")),
-      body: Center(
-        child: SizedBox(
-          width: 350,
-          child: Card(
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Join Room",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  TextField(
-                    controller: roomController,
-                    decoration: const InputDecoration(
-                      labelText: "Room ID",
-                      hintText: "Enter Room ID",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : joinRoom,
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text("Join Game"),
-                    ),
-                  ),
-                ],
-              ),
+    return CenteredCardPage(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Join Room",
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: AppColors.text,
             ),
           ),
-        ),
+
+          const SizedBox(height: 20),
+
+          TextField(
+            controller: roomController,
+            textAlign: TextAlign.center,
+            decoration: const InputDecoration(
+              labelText: "Room ID",
+              hintText: "Enter Room ID",
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : joinRoom,
+              child: isLoading
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text("Join Game"),
+            ),
+          ),
+        ],
       ),
     );
   }

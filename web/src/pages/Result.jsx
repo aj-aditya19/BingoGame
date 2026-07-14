@@ -5,8 +5,7 @@ const Result = ({ winner, isDraw, onPlayAgain }) => {
   const [countdown, setCountdown] = useState(7);
   const [copyStatus, setCopyStatus] = useState("");
 
-  const websiteUrl =
-    typeof window !== "undefined" ? window.location.origin : "";
+  const websiteUrl = "https://bingogame-web-t73z.vercel.app/";
   const isWin = winner === "You";
 
   useEffect(() => {

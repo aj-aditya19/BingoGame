@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme/app_theme.dart';
 
 import 'pages/landing.dart';
 import 'pages/login.dart';
@@ -19,9 +20,10 @@ class BingoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AppController(),
+      theme: AppTheme.theme,
+      home: const AppController(),
     );
   }
 }
@@ -76,9 +78,7 @@ class _AppControllerState extends State<AppController> {
     });
   }
 
-  Future<void> loadUser() async {
-    // SharedPreferences later
-  }
+  Future<void> loadUser() async {}
 
   void resetGame() {
     setState(() {
@@ -108,7 +108,6 @@ class _AppControllerState extends State<AppController> {
   }
 
   void handlePlayWithBot() {
-    // Set guest user if not logged in
     if (user == null) {
       setState(() {
         user = {
@@ -248,6 +247,7 @@ class _AppControllerState extends State<AppController> {
           roomId: roomId ?? "",
           initialGrid: (gameGrid as List<List<Map<String, dynamic>>>),
           myUserId: user["_id"],
+          myName: user["name"] ?? "You",
           initialTurnUserId: initialTurnUserId ?? "",
           onGameEnd: (result) {
             setState(() {
@@ -259,6 +259,11 @@ class _AppControllerState extends State<AppController> {
           onCancel: handleCancelGame,
           onLogout: handleLogout,
           isBotGame: playMode == "bot",
+          botPlayerId: botPlayer != null ? botPlayer["_id"] : null,
+          botPlayerName: botPlayer != null ? botPlayer["name"] : null,
+          botInitialGrid: botGrid != null
+              ? (botGrid as List<List<Map<String, dynamic>>>)
+              : null,
         );
 
       case "result":

@@ -5,7 +5,6 @@ const rooms = new Map();
 
 const genRoomId = () => Math.random().toString(36).substring(2, 9);
 
-// CREATE ROOM
 router.post("/room/create", (req, res) => {
   console.log("In creating room");
 
@@ -24,7 +23,6 @@ router.post("/room/create", (req, res) => {
   res.json({ success: true, roomId });
 });
 
-// JOIN ROOM
 router.post("/room/join", (req, res) => {
   const { roomId } = req.body;
   const room = rooms.get(roomId);

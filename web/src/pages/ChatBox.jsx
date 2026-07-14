@@ -2,11 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { socket } from "../services/socket";
 import "../styles/ChatBox.css";
 
-// Simple chat box for the game screen.
-// Props:
-// - roomId: the room the two players are playing in
-// - myUserId: my own user id
-// - myName: my own name (shown next to my messages)
 const ChatBox = ({ roomId, myUserId, myName }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -14,12 +9,9 @@ const ChatBox = ({ roomId, myUserId, myName }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const chatEndRef = useRef(null);
 
-  // Listen for incoming messages from the server
   useEffect(() => {
     const handleReceive = (data) => {
       setMessages((prev) => [...prev, data]);
-
-      // if the chat panel is collapsed, count the new message as unread
       setIsOpen((currentlyOpen) => {
         if (!currentlyOpen) {
           setUnreadCount((count) => count + 1);
@@ -30,13 +22,11 @@ const ChatBox = ({ roomId, myUserId, myName }) => {
 
     socket.on("chat:receive", handleReceive);
 
-    // clean up the listener when component is removed
     return () => {
       socket.off("chat:receive", handleReceive);
     };
   }, []);
 
-  // Auto scroll to the latest message
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -44,7 +34,6 @@ const ChatBox = ({ roomId, myUserId, myName }) => {
   }, [messages, isOpen]);
 
   const sendMessage = () => {
-    // don't send empty messages
     if (text.trim() === "") return;
 
     socket.emit("chat:send", {
@@ -54,7 +43,7 @@ const ChatBox = ({ roomId, myUserId, myName }) => {
       senderName: myName || "Player",
     });
 
-    setText(""); // clear the input box
+    setText("");
   };
 
   const handleKeyPress = (e) => {
@@ -66,7 +55,6 @@ const ChatBox = ({ roomId, myUserId, myName }) => {
   const toggleChat = () => {
     setIsOpen((prev) => !prev);
     if (!isOpen) {
-      // opening the chat, so clear the unread badge
       setUnreadCount(0);
     }
   };
@@ -91,9 +79,7 @@ const ChatBox = ({ roomId, myUserId, myName }) => {
         <>
           <div className="chatbox-messages">
             {messages.length === 0 && (
-              <div className="chatbox-empty">
-                Say hi to your opponent 👋
-              </div>
+              <div className="chatbox-empty">Say hi to your opponent 👋</div>
             )}
 
             {messages.map((msg, index) => (

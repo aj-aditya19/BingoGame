@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class GameHomeScreen extends StatelessWidget {
   final VoidCallback onCreateRoom;
@@ -16,97 +17,100 @@ class GameHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+    return AppBackground(
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
                   child: Card(
-                    elevation: 12,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    color: Colors.white,
                     child: Padding(
-                      padding: const EdgeInsets.all(32),
+                      padding: const EdgeInsets.all(28),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Text(
                             "🎯 Bingo Game",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 32,
+                              fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: AppColors.text,
                             ),
                           ),
 
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
 
                           const Text(
                             "Choose your game mode",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-
-                          const SizedBox(height: 40),
-
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: onCreateRoom,
-                              icon: const Icon(Icons.home),
-                              label: const Text("Create Room"),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                backgroundColor: const Color(0xFF2563EB),
-                              ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.muted,
                             ),
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 28),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 90,
+                                  child: ElevatedButton(
+                                    onPressed: onCreateRoom,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                    child: const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add_home,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(height: 6),
+                                        Text("Create Room"),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 90,
+                                  child: ElevatedButton(
+                                    onPressed: onJoinRoom,
+                                    child: const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.meeting_room,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(height: 6),
+                                        Text("Join Room"),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
 
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton.icon(
-                              onPressed: onJoinRoom,
-                              icon: const Icon(Icons.door_front_door),
-                              label: const Text("Join Room"),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
                               onPressed: onPlayBot,
                               icon: const Icon(Icons.smart_toy),
                               label: const Text("Play with Bot"),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                backgroundColor: const Color(0xFF9333EA),
-                              ),
                             ),
                           ),
                         ],
@@ -115,17 +119,17 @@ class GameHomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
-                top: 16,
-                right: 16,
-                child: IconButton(
-                  icon: const Icon(Icons.logout, color: Colors.white),
-                  onPressed: onLogout,
-                  tooltip: "Logout",
-                ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.logout, color: AppColors.muted),
+                onPressed: onLogout,
+                tooltip: "Logout",
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

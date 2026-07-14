@@ -9,7 +9,6 @@
   box-shadow: 0 8px 20px rgba(31, 42, 55, 0.06);
 }
 
-/* ---------- Header (also acts as the collapse toggle) ---------- */
 
 .chatbox-header {
   width: 100%;
@@ -82,7 +81,6 @@
   transform: rotate(180deg);
 }
 
-/* ---------- Messages ---------- */
 
 .chatbox-messages {
   height: 220px;
@@ -124,7 +122,6 @@
   }
 }
 
-/* speech-bubble "tail" gives messages a ticket-like, torn-corner feel */
 .chatbox-message::before {
   content: "";
   position: absolute;
@@ -187,7 +184,6 @@
   opacity: 0.7;
 }
 
-/* ---------- Input area ---------- */
 
 .chatbox-input-area {
   display: flex;
@@ -238,7 +234,6 @@
   cursor: not-allowed;
 }
 
-/* small screens: let the chat use full width comfortably */
 @media (max-width: 480px) {
   .chatbox-container {
     max-width: 100%;

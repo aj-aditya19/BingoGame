@@ -5,14 +5,12 @@ import admin from "../config/firebase.js";
 
 const router = express.Router();
 
-// Helper function to generate JWT token
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET || "your_jwt_secret", {
     expiresIn: "30d",
   });
 };
 
-// Helper function to send user response with token
 const sendUserResponse = async (user, res, withToken = false) => {
   const response = { success: true, user: user.toObject() };
 
@@ -42,12 +40,9 @@ router.post("/register", async (req, res) => {
       password,
     });
 
-    // Session for web
     if (req.session) {
       req.session.userId = user._id;
     }
-
-    // Check if client requested token (mobile apps)
     const withToken =
       req.headers["x-client-type"] === "mobile" || req.body.returnToken;
     return sendUserResponse(user, res, withToken);
@@ -69,12 +64,10 @@ router.post("/login", async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
-    // Session for web
     if (req.session) {
       req.session.userId = user._id;
     }
 
-    // Check if client requested token (mobile apps)
     const withToken =
       req.headers["x-client-type"] === "mobile" || req.body.returnToken;
     return sendUserResponse(user, res, withToken);
@@ -102,12 +95,10 @@ router.post("/google", async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
-    // Session for web
     if (req.session) {
       req.session.userId = user._id;
     }
 
-    // Always return token for Google auth (typically mobile)
     return sendUserResponse(user, res, true);
   } catch (err) {
     console.error("Google auth error:", err);
@@ -115,7 +106,6 @@ router.post("/google", async (req, res) => {
   }
 });
 
-// Verify token endpoint (for mobile apps)
 router.get("/verify-token", (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];

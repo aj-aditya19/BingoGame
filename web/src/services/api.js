@@ -34,10 +34,6 @@ export const api = {
       body: JSON.stringify({ token }),
     });
   },
-
-  // ===============================
-  // 🎮 GAME / ROOM APIs
-  // ===============================
 };
 export const gameApi = {
   createRoom: async () => {
