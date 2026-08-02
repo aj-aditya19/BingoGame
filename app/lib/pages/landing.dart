@@ -25,10 +25,10 @@ class LandingScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              const Text(
+              Text(
                 "Play bingo with friends in a bright, animated game room.",
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
                   color: AppColors.text,

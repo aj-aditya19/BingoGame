@@ -154,9 +154,6 @@ class _GameScreenState extends State<GameScreen> {
 
   void _applyOfflineMove(int number) {
     final humanNewGrid = BingoGameUtils.markNumber(grid, number)['newGrid'];
-    final updated = grid
-        .map((row) => row.map((cell) => {...cell, "completed": false}).toList())
-        .toList();
     final humanEval = BingoGameUtils.evaluateGrid(humanNewGrid);
 
     Map<String, dynamic>? botEval;
@@ -232,8 +229,6 @@ class _GameScreenState extends State<GameScreen> {
       "draw": isDraw,
     });
   }
-
-  /* ================= WIN CHECKING (multiplayer) ================= */
 
   Map<String, dynamic> checkWin(List<List<Map<String, dynamic>>> board) {
     int lines = 0;
@@ -334,125 +329,118 @@ class _GameScreenState extends State<GameScreen> {
     final cells = grid.expand((row) => row).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Bingo Game"),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: widget.onLogout,
-            tooltip: "Logout",
-          ),
-        ],
-      ),
       body: AppBackground(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Column(
-                children: [
-                  Text(
-                    titleText,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: titleColor,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.panel,
-                        border: Border.all(color: AppColors.line),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: GridView.builder(
-                        itemCount: cells.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 5,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                            ),
-                        itemBuilder: (context, index) {
-                          final cell = cells[index];
-
-                          final chosen = cell["chosen"] == true;
-                          final completed = cell["completed"] == true;
-
-                          Color bg = AppColors.bgSoft;
-                          Color fg = AppColors.text;
-                          Color border = AppColors.line;
-
-                          if (completed) {
-                            bg = AppColors.completedCellBg;
-                            fg = AppColors.completedCellText;
-                            border = AppColors.completedCellBorder;
-                          } else if (chosen) {
-                            bg = AppColors.chosenCellBg;
-                            fg = AppColors.chosenCellText;
-                          }
-
-                          return ElevatedButton(
-                            onPressed: chosen || isLocked
-                                ? null
-                                : () => selectNumber(cell),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: bg,
-                              foregroundColor: fg,
-                              disabledBackgroundColor: bg,
-                              disabledForegroundColor: fg,
-                              side: BorderSide(color: border),
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              cell["value"].toString(),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  if (!widget.isBotGame)
-                    ChatBox(
-                      roomId: widget.roomId,
-                      myUserId: widget.myUserId,
-                      myName: widget.myName,
-                    ),
-
-                  const SizedBox(height: 12),
-
-                  if (widget.isBotGame)
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: widget.onCancel,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.danger,
-                          backgroundColor: const Color(0xFFFFF1F2),
-                          side: const BorderSide(color: Color(0xFFFECACA)),
+        child: Center(
+          child: SingleChildScrollView(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: Column(
+                    children: [
+                      Text(
+                        titleText,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: titleColor,
                         ),
-                        child: const Text("Cancel Game"),
                       ),
-                    ),
-                ],
+
+                      const SizedBox(height: 16),
+
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.panel,
+                          border: Border.all(color: AppColors.line),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: cells.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 5,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                              ),
+                          itemBuilder: (context, index) {
+                            final cell = cells[index];
+
+                            final chosen = cell["chosen"] == true;
+                            final completed = cell["completed"] == true;
+
+                            Color bg = AppColors.bgSoft;
+                            Color fg = AppColors.text;
+                            Color border = AppColors.line;
+
+                            if (completed) {
+                              bg = AppColors.completedCellBg;
+                              fg = AppColors.completedCellText;
+                              border = AppColors.completedCellBorder;
+                            } else if (chosen) {
+                              bg = AppColors.chosenCellBg;
+                              fg = AppColors.chosenCellText;
+                            }
+
+                            return ElevatedButton(
+                              onPressed: chosen || isLocked
+                                  ? null
+                                  : () => selectNumber(cell),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: bg,
+                                foregroundColor: fg,
+                                disabledBackgroundColor: bg,
+                                disabledForegroundColor: fg,
+                                side: BorderSide(color: border),
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                cell["value"].toString(),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      if (!widget.isBotGame)
+                        ChatBox(
+                          roomId: widget.roomId,
+                          myUserId: widget.myUserId,
+                          myName: widget.myName,
+                        ),
+
+                      const SizedBox(height: 12),
+
+                      if (widget.isBotGame)
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: widget.onCancel,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.danger,
+                              backgroundColor: const Color(0xFFFFF1F2),
+                              side: const BorderSide(color: Color(0xFFFECACA)),
+                            ),
+                            child: const Text("Cancel Game"),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

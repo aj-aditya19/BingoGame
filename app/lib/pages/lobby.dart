@@ -25,134 +25,136 @@ class LobbyScreen extends StatelessWidget {
       appBar: AppBar(title: const Text("Game Lobby")),
       body: AppBackground(
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
-              child: Column(
-                children: [
-                  const Text(
-                    "🎮 Game Lobby",
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.text,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    "Room ID: $roomId",
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: AppColors.muted,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  _sectionTitle("Players"),
-
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        children: [
-                          _playerRow(
-                            "✅ ${player1?["name"] ?? "Player 1"} "
-                            "(${player1?["role"] ?? "Player"})",
-                          ),
-                          const SizedBox(height: 8),
-                          _playerRow(
-                            player2 != null
-                                ? "✅ ${player2["name"]} "
-                                      "(${player2["role"] ?? "Player"})"
-                                : "⏳ Waiting for Player 2...",
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  _sectionTitle("Grids Preview"),
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: GridPreview(
-                          title: "Player 1",
-                          grid: player1?["grid"],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: GridPreview(
-                          title: "Player 2",
-                          grid: player2?["grid"],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  _sectionTitle("Rules"),
-
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "• Players take turns",
-                            style: TextStyle(color: AppColors.muted),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            "• Strike numbers one by one",
-                            style: TextStyle(color: AppColors.muted),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            "• Complete BINGO to win",
-                            style: TextStyle(color: AppColors.muted),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  if (isHost && player2 != null)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: onStartGame,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.accent,
-                        ),
-                        child: const Text("🚀 Let's Play"),
-                      ),
-                    ),
-
-                  if (isHost && player2 == null)
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  children: [
                     const Text(
-                      "Waiting for another player...",
-                      style: TextStyle(fontSize: 15, color: AppColors.muted),
+                      "🎮 Game Lobby",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
+                      ),
                     ),
 
-                  if (!isHost)
-                    const Text(
-                      "Waiting for the host to start the game...",
-                      style: TextStyle(fontSize: 15, color: AppColors.muted),
+                    const SizedBox(height: 6),
+
+                    Text(
+                      "Room ID: $roomId",
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: AppColors.muted,
+                      ),
                     ),
-                ],
+
+                    const SizedBox(height: 20),
+
+                    _sectionTitle("Players"),
+
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          children: [
+                            _playerRow(
+                              "✅ ${player1?["name"] ?? "Player 1"} "
+                              "(${player1?["role"] ?? "Player"})",
+                            ),
+                            const SizedBox(height: 8),
+                            _playerRow(
+                              player2 != null
+                                  ? "✅ ${player2["name"]} "
+                                        "(${player2["role"] ?? "Player"})"
+                                  : "⏳ Waiting for Player 2...",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    _sectionTitle("Grids Preview"),
+
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: GridPreview(
+                            title: "Player 1",
+                            grid: player1?["grid"],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GridPreview(
+                            title: "Player 2",
+                            grid: player2?["grid"],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    _sectionTitle("Rules"),
+
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "• Players take turns",
+                              style: TextStyle(color: AppColors.muted),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              "• Strike numbers one by one",
+                              style: TextStyle(color: AppColors.muted),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              "• Complete BINGO to win",
+                              style: TextStyle(color: AppColors.muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    if (isHost && player2 != null)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: onStartGame,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accent,
+                          ),
+                          child: const Text("🚀 Let's Play"),
+                        ),
+                      ),
+
+                    if (isHost && player2 == null)
+                      const Text(
+                        "Waiting for another player...",
+                        style: TextStyle(fontSize: 15, color: AppColors.muted),
+                      ),
+
+                    if (!isHost)
+                      const Text(
+                        "Waiting for the host to start the game...",
+                        style: TextStyle(fontSize: 15, color: AppColors.muted),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

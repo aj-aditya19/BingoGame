@@ -136,105 +136,118 @@ class _GridScreenState extends State<GridScreen> {
   Widget build(BuildContext context) {
     final cells = grid.expand((e) => e).toList();
 
+    // return SingleChildScrollView(
+    // child: Scaffold(
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Your Bingo Grid")),
       body: AppBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
-              child: Column(
-                children: [
-                  const Text(
-                    "Fill 1-25, no repeats",
-                    style: TextStyle(color: AppColors.muted, fontSize: 13),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.panel,
-                        border: Border.all(color: AppColors.line),
-                        borderRadius: BorderRadius.circular(14),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 500),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Create Your Bingo Grid",
+                        style: TextStyle(
+                          color: const Color.fromARGB(255, 0, 0, 0),
+                          fontSize: 20,
+                        ),
                       ),
-                      child: GridView.builder(
-                        itemCount: cells.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 5,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                            ),
-                        itemBuilder: (context, index) {
-                          final row = index ~/ 5;
-                          final col = index % 5;
+                      const Text(
+                        "Fill 1-25, no repeats",
+                        style: TextStyle(color: AppColors.muted, fontSize: 13),
+                      ),
 
-                          final cell = grid[row][col];
+                      const SizedBox(height: 10),
 
-                          final isDup =
-                              cell["value"] != null &&
-                              duplicates.contains(cell["value"]);
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.panel,
+                          border: Border.all(color: AppColors.line),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: cells.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 5,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: 1,
+                              ),
+                          itemBuilder: (context, index) {
+                            final row = index ~/ 5;
+                            final col = index % 5;
 
-                          return TextFormField(
-                            key: ValueKey("${row}_${col}_${cell["value"]}"),
-                            initialValue: cell["value"]?.toString() ?? "",
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.text,
-                            ),
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: isDup
-                                  ? const Color(0xFFFFF1F2)
-                                  : AppColors.bgSoft,
-                              contentPadding: EdgeInsets.zero,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                  color: isDup
-                                      ? AppColors.danger
-                                      : AppColors.line,
+                            final cell = grid[row][col];
+
+                            final isDup =
+                                cell["value"] != null &&
+                                duplicates.contains(cell["value"]);
+
+                            return TextFormField(
+                              key: ValueKey("${row}_${col}_${cell["value"]}"),
+                              initialValue: cell["value"]?.toString() ?? "",
+                              keyboardType: TextInputType.number,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.text,
+                              ),
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: isDup
+                                    ? const Color(0xFFFFF1F2)
+                                    : AppColors.bgSoft,
+                                contentPadding: EdgeInsets.zero,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: isDup
+                                        ? AppColors.danger
+                                        : AppColors.line,
+                                  ),
                                 ),
                               ),
-                            ),
-                            onChanged: (value) {
-                              onChangeCell(row, col, value);
-                            },
-                          );
-                        },
+                              onChanged: (value) {
+                                onChangeCell(row, col, value);
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ),
 
-                  const SizedBox(height: 14),
+                      const SizedBox(height: 14),
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: randomBox,
-                      child: const Text("🎲 Random Box"),
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: continueNext,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent,
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: randomBox,
+                          child: const Text("🎲 Random Box"),
+                        ),
                       ),
-                      child: const Text("Continue"),
-                    ),
+
+                      const SizedBox(height: 10),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: continueNext,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accent,
+                          ),
+                          child: const Text("Continue"),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

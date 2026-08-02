@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'theme/app_theme.dart';
-
 import 'pages/landing.dart';
 import 'pages/login.dart';
 import 'pages/register.dart';
@@ -12,8 +12,8 @@ import 'pages/lobby.dart';
 import 'pages/game.dart';
 import 'pages/result.dart';
 import 'pages/create_bot.dart';
-
 import 'services/socket_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BingoApp extends StatelessWidget {
   const BingoApp({super.key});
@@ -36,28 +36,23 @@ class AppController extends StatefulWidget {
 }
 
 class _AppControllerState extends State<AppController> {
-  String page = "landing";
-
+  String page = "Landing";
   String? mode;
   String? playMode;
   String? roomId;
-
   dynamic gameGrid;
   dynamic botPlayer;
   dynamic botGrid;
   List players = [];
-
   String? winner;
   bool isDraw = false;
-
   String? initialTurnUserId;
-
   dynamic user;
 
+  //Socket use for avoiding login again and again
   @override
   void initState() {
     super.initState();
-
     SocketService.connect();
     loadUser();
     _setupSocket();
@@ -78,7 +73,26 @@ class _AppControllerState extends State<AppController> {
     });
   }
 
-  Future<void> loadUser() async {}
+  Future<void> loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userString = prefs.getString("user");
+    if (userString != null) {
+      setState(() {
+        user = jsonDecode(userString);
+        // page = "home";
+      });
+    }
+  }
+
+  Future<void> saveUser(Map<String, dynamic> userData) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("user", jsonEncode(userData));
+  }
+
+  Future<void> logoutUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("user");
+  }
 
   void resetGame() {
     setState(() {
@@ -95,11 +109,12 @@ class _AppControllerState extends State<AppController> {
     });
   }
 
-  void handleLogout() {
+  Future<void> handleLogout() async {
+    await logoutUser();
     resetGame();
     setState(() {
       user = null;
-      page = "landing";
+      page = "Landing";
     });
   }
 
@@ -128,153 +143,281 @@ class _AppControllerState extends State<AppController> {
 
   void handlePlayWithFriends() {
     setState(() {
-      page = "login";
+      if (user != null) {
+        page = "home";
+      } else {
+        page = "login";
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     switch (page) {
-      case "landing":
-        return LandingScreen(
-          onPlayWithBot: handlePlayWithBot,
-          onPlayWithFriends: handlePlayWithFriends,
+      case "Landing":
+        return Scaffold(
+          body: LandingScreen(
+            onPlayWithBot: handlePlayWithBot,
+            onPlayWithFriends: handlePlayWithFriends,
+          ),
         );
 
       case "login":
-        return LoginScreen(
-          onLogin: (userData) {
-            setState(() {
-              user = userData;
-              page = "home";
-            });
-          },
-          onRegister: () => setState(() => page = "register"),
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "Landing";
+              });
+            },
+          ),
+          body: LoginScreen(
+            onLogin: (userData) async {
+              await saveUser(userData);
+              setState(() {
+                user = userData;
+                page = "home";
+              });
+            },
+            onRegister: () => setState(() => page = "register"),
+          ),
         );
 
       case "register":
-        return RegisterScreen(
-          onRegister: (userData) {
-            setState(() {
-              user = userData;
-              page = "home";
-            });
-          },
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "Landing";
+              });
+            },
+          ),
+          body: RegisterScreen(
+            onRegister: (userData) async {
+              await saveUser(userData);
+              setState(() {
+                user = userData;
+                page = "home";
+              });
+            },
+          ),
         );
 
       case "home":
-        return GameHomeScreen(
-          onCreateRoom: () {
-            setState(() {
-              mode = "create";
-              playMode = "multiplayer";
-              page = "grid";
-            });
-          },
-          onJoinRoom: () {
-            setState(() {
-              mode = "join";
-              playMode = "multiplayer";
-              page = "grid";
-            });
-          },
-          onPlayBot: handlePlayWithBot,
-          onLogout: handleLogout,
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "Landing";
+              });
+            },
+            onLogout: handleLogout,
+          ),
+          body: GameHomeScreen(
+            onCreateRoom: () {
+              setState(() {
+                mode = "create";
+                playMode = "multiplayer";
+                page = "grid";
+              });
+            },
+            onJoinRoom: () {
+              setState(() {
+                mode = "join";
+                playMode = "multiplayer";
+                page = "grid";
+              });
+            },
+            onPlayBot: handlePlayWithBot,
+          ),
         );
 
       case "grid":
-        return GridScreen(
-          onDone: (grid) {
-            setState(() {
-              gameGrid = grid;
-              if (playMode == "bot") {
-                page = "bot-setup";
-              } else {
-                page = mode == "create" ? "create-room" : "join-room";
-              }
-            });
-          },
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "home";
+              });
+            },
+          ),
+          body: GridScreen(
+            onDone: (grid) {
+              setState(() {
+                gameGrid = grid;
+                if (playMode == "bot") {
+                  page = "bot-setup";
+                } else {
+                  page = mode == "create" ? "create-room" : "join-room";
+                }
+              });
+            },
+          ),
         );
 
       case "bot-setup":
-        return CreateBotScreen(
-          onBotReady: (bot, grid) {
-            setState(() {
-              botPlayer = bot;
-              botGrid = grid;
-              page = "game";
-            });
-          },
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "home";
+              });
+            },
+          ),
+          body: CreateBotScreen(
+            onBotReady: (bot, grid) {
+              setState(() {
+                botPlayer = bot;
+                botGrid = grid;
+                page = "game";
+              });
+            },
+          ),
         );
 
       case "create-room":
-        return CreateRoomScreen(
-          grid: gameGrid,
-          user: user,
-          onCreated: (id) {
-            setState(() {
-              roomId = id;
-              page = "lobby";
-            });
-          },
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "home";
+              });
+            },
+          ),
+          body: CreateRoomScreen(
+            grid: gameGrid,
+            user: user,
+            onCreated: (id) {
+              setState(() {
+                roomId = id;
+                page = "lobby";
+              });
+            },
+          ),
         );
 
       case "join-room":
-        return JoinRoomScreen(
-          grid: gameGrid,
-          user: user,
-          onJoined: (id) {
-            setState(() {
-              roomId = id;
-              page = "lobby";
-            });
-          },
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "home";
+              });
+            },
+          ),
+          body: JoinRoomScreen(
+            grid: gameGrid,
+            user: user,
+            onJoined: (id) {
+              setState(() {
+                roomId = id;
+                page = "lobby";
+              });
+            },
+          ),
         );
 
       case "lobby":
-        return LobbyScreen(
-          roomId: roomId ?? "",
-          isHost: mode == "create",
-          player1: players.isNotEmpty ? players[0] : null,
-          player2: players.length > 1 ? players[1] : null,
-          onStartGame: () {
-            SocketService.socket.emit("start-game", {"roomId": roomId});
-          },
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "home";
+              });
+            },
+          ),
+          body: LobbyScreen(
+            roomId: roomId ?? "",
+            isHost: mode == "create",
+            player1: players.isNotEmpty ? players[0] : null,
+            player2: players.length > 1 ? players[1] : null,
+            onStartGame: () {
+              SocketService.socket.emit("start-game", {"roomId": roomId});
+            },
+          ),
         );
 
       case "game":
-        return GameScreen(
-          roomId: roomId ?? "",
-          initialGrid: (gameGrid as List<List<Map<String, dynamic>>>),
-          myUserId: user["_id"],
-          myName: user["name"] ?? "You",
-          initialTurnUserId: initialTurnUserId ?? "",
-          onGameEnd: (result) {
-            setState(() {
-              winner = result["winnerName"];
-              isDraw = result["draw"] ?? false;
-              page = "result";
-            });
-          },
-          onCancel: handleCancelGame,
-          onLogout: handleLogout,
-          isBotGame: playMode == "bot",
-          botPlayerId: botPlayer != null ? botPlayer["_id"] : null,
-          botPlayerName: botPlayer != null ? botPlayer["name"] : null,
-          botInitialGrid: botGrid != null
-              ? (botGrid as List<List<Map<String, dynamic>>>)
-              : null,
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "lobby";
+              });
+            },
+          ),
+          body: GameScreen(
+            roomId: roomId ?? "",
+            initialGrid: (gameGrid as List<List<Map<String, dynamic>>>),
+            myUserId: user["_id"],
+            myName: user["name"] ?? "You",
+            initialTurnUserId: initialTurnUserId ?? "",
+            onGameEnd: (result) {
+              setState(() {
+                winner = result["winnerName"];
+                isDraw = result["draw"] ?? false;
+                page = "result";
+              });
+            },
+            onCancel: handleCancelGame,
+            onLogout: handleLogout,
+            isBotGame: playMode == "bot",
+            botPlayerId: botPlayer != null ? botPlayer["_id"] : null,
+            botPlayerName: botPlayer != null ? botPlayer["name"] : null,
+            botInitialGrid: botGrid != null
+                ? (botGrid as List<List<Map<String, dynamic>>>)
+                : null,
+          ),
         );
 
       case "result":
-        return ResultScreen(
-          winner: winner,
-          isDraw: isDraw,
-          onPlayAgain: resetGame,
+        return Scaffold(
+          appBar: MyAppBar(
+            onBack: () {
+              setState(() {
+                page = "home";
+              });
+            },
+          ),
+          body: ResultScreen(
+            winner: winner,
+            isDraw: isDraw,
+            onPlayAgain: resetGame,
+          ),
         );
 
       default:
-        return const Scaffold(body: Center(child: Text("Unknown Page")));
+        return Scaffold(body: Center(child: Text("Unknown Page")));
     }
   }
+}
+
+class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final VoidCallback? onBack;
+  final VoidCallback? onLogout;
+
+  const MyAppBar({super.key, this.onBack, this.onLogout});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      leading: onBack != null
+          ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: onBack)
+          : null,
+      actions: onLogout != null
+          ? [
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: onLogout,
+                tooltip: "Logout",
+              ),
+            ]
+          : null,
+      title: const Text("Bingo Game"),
+      centerTitle: false,
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

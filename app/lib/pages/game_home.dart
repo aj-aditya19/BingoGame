@@ -5,14 +5,12 @@ class GameHomeScreen extends StatelessWidget {
   final VoidCallback onCreateRoom;
   final VoidCallback onJoinRoom;
   final VoidCallback onPlayBot;
-  final VoidCallback onLogout;
 
   const GameHomeScreen({
     super.key,
     required this.onCreateRoom,
     required this.onJoinRoom,
     required this.onPlayBot,
-    required this.onLogout,
   });
 
   @override
@@ -118,15 +116,6 @@ class GameHomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: IconButton(
-                icon: const Icon(Icons.logout, color: AppColors.muted),
-                onPressed: onLogout,
-                tooltip: "Logout",
               ),
             ),
           ],
