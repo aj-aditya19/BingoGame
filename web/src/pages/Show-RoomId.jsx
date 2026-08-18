@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../styles/Show-RoomID.css";
+import "../styles/Show-RoomId.css";
 
 const ShowRoomId = ({ roomId, isHost, gotolobby }) => {
   const [copied, setCopied] = useState(false);
