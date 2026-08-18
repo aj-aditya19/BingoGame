@@ -29,9 +29,9 @@ router.post("/room/join", (req, res) => {
 
   if (!room) return res.json({ success: false, message: "Room not found" });
 
-  if (room.players.length >= 2)
+  if (room.players.length >= 2 && room.players[0] === room.players[1]) {
     return res.json({ success: false, message: "Room full" });
-
+  }
   res.json({ success: true });
 });
 

@@ -96,7 +96,6 @@ const ChatBox = ({ roomId, myUserId, myName }) => {
                 <span className="chatbox-time">{msg.time}</span>
               </div>
             ))}
-            {/* empty div used just to auto-scroll to the bottom */}
             <div ref={chatEndRef}></div>
           </div>
 

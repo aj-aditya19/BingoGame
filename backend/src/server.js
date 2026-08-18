@@ -31,7 +31,9 @@ const allowedOrigins = new Set(
 );
 
 const isAllowedOrigin = (origin) => {
-  if (!origin) return true;
+  if (!origin) {
+    return true;
+  }
 
   if (
     origin.startsWith("http://localhost") ||

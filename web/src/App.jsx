@@ -3,6 +3,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import GameHome from "./pages/GameHome";
+import ShowRoomId from "./pages/Show-RoomId";
 import Grid from "./pages/Grid";
 import CreateBot from "./pages/CreateBot";
 import CreateRoom from "./pages/CreateRoom";
@@ -45,7 +46,6 @@ const App = () => {
   const [winner, setWinner] = useState(null);
   const [isDraw, setIsDraw] = useState(false);
   const [initialTurnUserId, setInitialTurnUserId] = useState(null);
-
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
@@ -103,7 +103,7 @@ const App = () => {
     setMode(null);
     setPlayMode(null);
     clearSavedUser();
-    navigate("/", { replace: true });
+    navigate("/auth", { replace: true });
     setPage("landing");
   };
 
@@ -215,7 +215,7 @@ const App = () => {
       return;
     }
 
-    setPage("lobby");
+    setPage("show-roomID");
   };
 
   const handleRoomJoined = (id) => {
@@ -249,6 +249,7 @@ const App = () => {
     "login",
     "register",
     "grid",
+    "show-roomID",
     "bot-setup",
     "create-room",
     "join-room",
@@ -340,6 +341,17 @@ const App = () => {
       case "join-room":
         return (
           <JoinRoom grid={gameGrid} user={user} onJoined={handleRoomJoined} />
+        );
+
+      case "show-roomID":
+        return (
+          <ShowRoomId
+            roomId={roomId}
+            isHost={mode === "create"}
+            gotolobby={() => {
+              setPage("lobby");
+            }}
+          />
         );
 
       case "lobby":

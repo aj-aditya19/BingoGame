@@ -70,11 +70,11 @@ const Login = ({ onLogin, onRegister }) => {
           </button>
         </form>
 
-        <div className="divider"></div>
+        {/* <div className="divider"></div>
 
         <button className="google-btn" onClick={handleGoogleLogin}>
           Continue with Google
-        </button>
+        </button> */}
 
         <p className="register-text">
           New user?{" "}
