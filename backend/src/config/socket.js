@@ -109,13 +109,13 @@ const initSocket = (io) => {
       io.to(roomId).emit("game:update", { number });
 
       if (room.players.length < 2) {
-        console.log("⚠️ Waiting for opponent");
+        console.log("Waiting for opponent");
         return;
       }
       const nextPlayer = getNextPlayer(room.players, userId);
 
       if (!nextPlayer) {
-        console.log("⚠️ No next player found");
+        console.log("No next player found");
         return;
       }
 
@@ -168,10 +168,10 @@ const initSocket = (io) => {
 
       if (room.players.length === 0) {
         rooms.delete(roomId);
-        console.log("🧹 Room deleted (empty):", roomId);
+        console.log("Room deleted (empty):", roomId);
       }
 
-      console.log("👋 socket left room:", roomId);
+      console.log("socket left room:", roomId);
     });
     socket.on("disconnect", async () => {
       console.log("Socket disconnected:", socket.id);
