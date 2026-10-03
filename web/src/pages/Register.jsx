@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { auth, googleProvider } from "../services/firebase";
-import { signInWithPopup } from "firebase/auth";
 import "../styles/Register.css";
 
 export default function Register({ onRegister, onLogin }) {
@@ -33,24 +31,6 @@ export default function Register({ onRegister, onLogin }) {
     } catch (err) {
       console.error("Registration error:", err);
       alert("Error registering. Check console for details.");
-    }
-  };
-
-  const handleGoogleRegister = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const token = await result.user.getIdToken();
-
-      const res = await api.googleAuth(token);
-
-      if (res.success) {
-        if (onRegister) onRegister(res.user || res.data?.user);
-      } else {
-        alert(res.message || "Google login failed");
-      }
-    } catch (err) {
-      console.error("Google login error:", err);
-      alert("Google login failed. Check console.");
     }
   };
 
@@ -88,10 +68,6 @@ export default function Register({ onRegister, onLogin }) {
         </form>
 
         <div className="divider"></div>
-
-        <button className="google-register-btn" onClick={handleGoogleRegister}>
-          Continue with Google
-        </button>
 
         <p className="register-text">
           Already have an account?{" "}

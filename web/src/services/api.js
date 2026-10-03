@@ -41,13 +41,6 @@ export const api = {
       body: JSON.stringify(data),
     });
   },
-
-  googleAuth: async (token) => {
-    return requestJson("/google", {
-      method: "POST",
-      body: JSON.stringify({ token }),
-    });
-  },
 };
 
 export const gameApi = {

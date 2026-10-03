@@ -2,7 +2,6 @@ import express from "express";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import User from "../database/User.js";
-import admin from "../config/firebase.js";
 import { sendOtpEmail, sendWelcomeEmail } from "../config/mailer.js";
 
 const router = express.Router();
@@ -226,35 +225,6 @@ router.post("/reset-password", async (req, res) => {
   } catch (err) {
     console.error("Reset password error:", err);
     return res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-router.post("/google", async (req, res) => {
-  try {
-    const { token } = req.body;
-    const decoded = await admin.auth().verifyIdToken(token);
-
-    let user = await User.findOne({ email: decoded.email });
-
-    if (!user) {
-      user = await User.create({
-        name: decoded.name,
-        email: decoded.email,
-        provider: "google",
-      });
-    }
-
-    user.lastLogin = new Date();
-    await user.save();
-
-    if (req.session) {
-      req.session.userId = user._id;
-    }
-
-    return sendUserResponse(user, res, true);
-  } catch (err) {
-    console.error("Google auth error:", err);
-    res.status(401).json({ success: false, message: "Authentication failed" });
   }
 });
 

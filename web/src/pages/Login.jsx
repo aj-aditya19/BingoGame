@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { api } from "../services/api";
-import { auth, googleProvider } from "../services/firebase";
-import { signInWithPopup } from "firebase/auth";
 import "../styles/Login.css";
 
 const Login = ({ onLogin, onRegister, onForgotPassword }) => {
@@ -21,16 +19,6 @@ const Login = ({ onLogin, onRegister, onForgotPassword }) => {
     e.preventDefault();
 
     const res = await api.login(form);
-    if (res.success) {
-      onLogin(res.user || res.data?.user);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    const result = await signInWithPopup(auth, googleProvider);
-    const token = await result.user.getIdToken();
-
-    const res = await api.googleAuth(token);
     if (res.success) {
       onLogin(res.user || res.data?.user);
     }
@@ -73,12 +61,6 @@ const Login = ({ onLogin, onRegister, onForgotPassword }) => {
             Forgot password?
           </span>
         </form>
-
-        {/* <div className="divider"></div>
-
-        <button className="google-btn" onClick={handleGoogleLogin}>
-          Continue with Google
-        </button> */}
 
         <p className="register-text">
           New user?{" "}

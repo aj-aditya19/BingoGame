@@ -12,7 +12,6 @@ The backend is fully configured to support Flutter mobile app, web frontend (Rea
 - **Database**: MongoDB
 - **Real-time**: Socket.io (WebSocket)
 - **Authentication**: JWT tokens + Sessions
-- **Firebase**: Google OAuth integration
 
 ### API Endpoints
 
@@ -20,7 +19,6 @@ The backend is fully configured to support Flutter mobile app, web frontend (Rea
 
 - `POST /register` - Register new user
 - `POST /login` - Login with email/password
-- `POST /google` - Google OAuth login
 - `GET /verify-token` - Verify JWT token validity
 
 #### Game (`/api/game`)
@@ -74,11 +72,6 @@ NODE_ENV=development
 # Security
 SESSION_SECRET=your_strong_random_secret_here
 JWT_SECRET=your_jwt_secret_here
-
-# Firebase (for Google OAuth)
-FIREBASE_PRIVATE_KEY=your_firebase_key
-FIREBASE_CLIENT_EMAIL=your_firebase_email@service.gserviceaccount.com
-FIREBASE_PROJECT_ID=your_project_id
 ```
 
 ### 2. Install Dependencies
@@ -354,7 +347,6 @@ SocketService.socket.emit('join-room', {
 
 - [ ] Environment variables configured
 - [ ] MongoDB connection verified
-- [ ] Firebase credentials set up
 - [ ] JWT secret changed
 - [ ] SESSION_SECRET changed
 - [ ] CORS origins configured
