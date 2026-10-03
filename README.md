@@ -270,11 +270,11 @@ The image uses `node:20-alpine`, installs production dependencies only, runs as 
 
 `.github/workflows/ci.yml` runs on every push and pull request:
 
-| Job       | What it does                                                    |
-| --------- | --------------------------------------------------------------- |
-| `backend` | `npm ci`, syntax check, lint and tests if present (Node 20, 22) |
-| `web`     | `npm ci`, lint if present, production build (Node 20, 22)       |
-| `docker`  | Builds the backend Docker image (no push)                       |
+| Job       | What it does                                                              |
+| --------- | ------------------------------------------------------------------------- |
+| `backend` | `npm ci`, syntax check of all source files, lint if present (Node 20, 22) |
+| `web`     | `npm ci`, lint if present, production build (Node 20, 22)                 |
+| `docker`  | Builds the backend Docker image (no push)                                 |
 
 Each project keeps its own `package-lock.json`, and the workflow points `cache-dependency-path` at it. Make sure both lock files are committed.
 

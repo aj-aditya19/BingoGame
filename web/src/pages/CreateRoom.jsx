@@ -59,7 +59,7 @@ const CreateRoom = ({
     try {
       await navigator.clipboard.writeText(roomId);
       setCopyStatus("Copied");
-    } catch (error) {
+    } catch {
       setCopyStatus("Copy failed");
     }
 

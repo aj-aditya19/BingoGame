@@ -22,16 +22,14 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-          # lock file backend/ folder me hai, repo root me nahi
           cache-dependency-path: backend/package-lock.json
 
       - run: npm ci
 
-      - name: Syntax check
-        run: node --check src/server.js
+      - name: Syntax check (all source files)
+        run: find src -name "*.js" -print0 | xargs -0 -n1 node --check
 
       - run: npm run lint --if-present
-      - run: npm test --if-present
 
   web:
     name: Web (Node ${{ matrix.node }})

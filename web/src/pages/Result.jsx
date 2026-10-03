@@ -29,7 +29,7 @@ const Result = ({ winner, isDraw, onPlayAgain }) => {
     try {
       await navigator.clipboard.writeText(websiteUrl);
       setCopyStatus("Link copied");
-    } catch (error) {
+    } catch {
       setCopyStatus("Copy failed");
     }
 

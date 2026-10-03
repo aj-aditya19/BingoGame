@@ -1,7 +1,7 @@
 import React from "react";
 import "../styles/Landing.css";
 
-const Landing = ({ onPlayWithBot, gotohomepage, onLogin }) => {
+const Landing = ({ onPlayWithBot, onLogin }) => {
   return (
     <div className="landing-container">
       <div className="landing-grid" />

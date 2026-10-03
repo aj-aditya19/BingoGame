@@ -25,26 +25,35 @@ const Game = ({
   const [botGrid, setBotGrid] = useState(() =>
     botInitialGrid ? cloneGrid(botInitialGrid) : null,
   );
-  const [currentTurn, setCurrentTurn] = useState(offlineMode ? myUserId : null);
+  const [currentTurn, setCurrentTurn] = useState(
+    offlineMode ? myUserId : (initialTurnUserId ?? null),
+  );
   const [winner, setWinner] = useState(null);
 
   const isBotGame = offlineMode && !!botPlayerId;
 
-  useEffect(() => {
+  const [prevInitialGrid, setPrevInitialGrid] = useState(initialGrid);
+  if (initialGrid !== prevInitialGrid) {
+    setPrevInitialGrid(initialGrid);
     setGrid(cloneGrid(initialGrid));
-  }, [initialGrid]);
+  }
 
-  useEffect(() => {
+  const [prevBotInitialGrid, setPrevBotInitialGrid] = useState(botInitialGrid);
+  if (botInitialGrid !== prevBotInitialGrid) {
+    setPrevBotInitialGrid(botInitialGrid);
     if (botInitialGrid) {
       setBotGrid(cloneGrid(botInitialGrid));
     }
-  }, [botInitialGrid]);
+  }
 
-  useEffect(() => {
+  const turnSource = `${offlineMode}|${initialTurnUserId}`;
+  const [prevTurnSource, setPrevTurnSource] = useState(turnSource);
+  if (turnSource !== prevTurnSource) {
+    setPrevTurnSource(turnSource);
     if (!offlineMode && initialTurnUserId) {
       setCurrentTurn(initialTurnUserId);
     }
-  }, [offlineMode, initialTurnUserId]);
+  }
 
   useEffect(() => {
     if (offlineMode) return undefined;
