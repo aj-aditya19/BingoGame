@@ -1,2 +1,10 @@
-node_modules;
-npm - debug.log.git.env;
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -60,6 +60,13 @@
   border: 1px solid #bfdbfe;
 }
 
+.forgot-link {
+  color: #1d4ed8;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
 .divider {
   margin: 14px 0;
   border-top: 1px solid var(--line);

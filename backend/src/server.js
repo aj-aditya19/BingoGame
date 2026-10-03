@@ -1,4 +1,4 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import express from "express";
 import MongoStore from "connect-mongo";
 import session from "express-session";
@@ -10,9 +10,15 @@ import authRoutes from "./routes/auth.route.js";
 import gameRoutes from "./routes/game.route.js";
 import initSocket from "./config/socket.js";
 
-connectDB();
+dotenv.config();
+connectDB().catch((err) => {
+  console.error("MongoDB connection failed:", err.message);
+  process.exit(1);
+});
 
 const app = express();
+
+app.set("trust proxy", 1);
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";

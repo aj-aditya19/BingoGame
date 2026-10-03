@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema(
     loss: { type: Number, default: 0 },
     draw: { type: Number, default: 0 },
     lastLogin: { type: Date, default: null },
+
+    resetOtpHash: { type: String, default: null },
+    resetOtpExpires: { type: Date, default: null },
+    resetOtpAttempts: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

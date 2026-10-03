@@ -28,6 +28,20 @@ export const api = {
     });
   },
 
+  forgotPassword: async (email) => {
+    return requestJson("/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (data) => {
+    return requestJson("/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
   googleAuth: async (token) => {
     return requestJson("/google", {
       method: "POST",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import GameHome from "./pages/GameHome";
 import ShowRoomId from "./pages/Show-RoomId";
 import Grid from "./pages/Grid";
@@ -53,6 +54,7 @@ const App = () => {
 
   const isAuthRoute = location.pathname === "/auth";
   const isRegisterRoute = location.pathname === "/auth/register";
+  const isForgotRoute = location.pathname === "/auth/forgot-password";
 
   const saveUser = (userData) => {
     setUser(userData);
@@ -108,7 +110,7 @@ const App = () => {
   };
 
   const handleBack = () => {
-    if (isAuthRoute || isRegisterRoute) {
+    if (isAuthRoute || isRegisterRoute || isForgotRoute) {
       navigate("/auth", { replace: true });
       return;
     }
@@ -275,6 +277,10 @@ const App = () => {
   };
 
   const renderPage = () => {
+    if (isForgotRoute) {
+      return <ForgotPassword onBackToLogin={() => navigate("/auth", { replace: true })} />;
+    }
+
     if (isAuthRoute || isRegisterRoute) {
       return isRegisterRoute ? (
         <Register
@@ -285,6 +291,7 @@ const App = () => {
         <Login
           onLogin={handleLogin}
           onRegister={() => navigate("/auth/register", { replace: true })}
+          onForgotPassword={() => navigate("/auth/forgot-password", { replace: true })}
         />
       );
     }

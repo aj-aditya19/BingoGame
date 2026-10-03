@@ -21,6 +21,8 @@
     "firebase-admin": "^13.6.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.4",
-    "socket.io": "^4.8.3"
+    "nodemailer": "^10.0.13",
+    "socket.io": "^4.8.3",
+    "zod": "^4.6.5"
   }
 }

@@ -4,7 +4,7 @@ import { auth, googleProvider } from "../services/firebase";
 import { signInWithPopup } from "firebase/auth";
 import "../styles/Login.css";
 
-const Login = ({ onLogin, onRegister }) => {
+const Login = ({ onLogin, onRegister, onForgotPassword }) => {
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -68,6 +68,10 @@ const Login = ({ onLogin, onRegister }) => {
           <button type="submit" className="login-btn">
             Login
           </button>
+
+          <span className="forgot-link" onClick={onForgotPassword}>
+            Forgot password?
+          </span>
         </form>
 
         {/* <div className="divider"></div>
